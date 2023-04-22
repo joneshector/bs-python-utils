@@ -1,0 +1,75 @@
+site_name: bs-python-utils
+repo_url: https://github.com/bsalanie/bs-python-utils
+site_url: https://bsalanie.github.io/bs-python-utils
+site_description: my Python utilities
+site_author: Bernard Salanie
+edit_uri: edit/main/docs/
+repo_name: bsalanie/bs-python-utils
+copyright: Maintained by <a href="https://bsalanie.com">Florian</a>.
+
+nav:
+  - Home: index.md
+  - Modules: modules.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+            setup_commands:
+                - import sys
+                - sys.path.append('../')
+
+
+# theme:
+#   palette:
+#     scheme: preference
+
+
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - search.highlight
+    - navigation.expand
+    - navigation.tabs
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/bsalanie/bs-python-utils
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/bs-python-utils
+
+markdown_extensions:
+  - attr_list
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      linenums: true
+  - toc:
+      permalink: true
+  - admonition # add notes, warnings...
+  - codehilite
+  - toc
+  - pymdownx.arithmatex # for LaTeX
+extra_javascript: # for arithmatex
+  - "https://polyfill.io/v3/polyfill.min.js?features=es6"
+  - "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+
