@@ -154,7 +154,7 @@ def alt_plot_fun(
     f: Callable,
     start: float,
     end: float,
-    npoints: int | None = 100,
+    npoints: int = 100,
     save: str | None = None,
 ):
     """

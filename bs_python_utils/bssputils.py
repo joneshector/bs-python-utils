@@ -2,6 +2,7 @@
 Contains various `scipy` utility programs.
 """
 from math import sqrt
+from typing import cast
 
 import numpy as np
 import scipy.stats as sts
@@ -38,7 +39,7 @@ def spline_reg(
     x_new: np.ndarray | None = None,
     is_sorted: bool | None = False,
     smooth: bool | None = True,
-) -> np.array:
+) -> np.ndarray:
     """
     one-dimensional spline interpolation of vector y on vector x
 
@@ -76,4 +77,4 @@ def spline_reg(
 
     xeval = x if x_new is None else x_new
     y_pred = spl(xeval)
-    return y_pred
+    return cast(np.ndarray, y_pred)

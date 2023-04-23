@@ -1,12 +1,14 @@
 """ personal library of Seaborn plots
 """
-from typing import Callable
+from typing import Callable, cast
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+SeabornGraph = tuple[mpl.figure.Figure, mpl.figure.Axes]
 
 
 def bs_sns_get_legend(g: mpl.axes.Axes) -> mpl.legend.Legend:
@@ -43,7 +45,7 @@ def bs_sns_bar_x_byf(
     label_x: str | None = None,
     label_f: str | None = None,
     title: str | None = None,
-) -> tuple[mpl.figure.Figure, mpl.figure.Axes]:
+) -> SeabornGraph:
     """make a bar plot of x by f and g
 
     Args:
@@ -78,7 +80,7 @@ def bs_sns_bar_x_byf(
     ax.set_ylabel(ylab)
     if title is not None:
         ax.set_title(title)
-    return gbar
+    return cast(SeabornGraph, gbar)
 
 
 def bs_sns_bar_x_byfg(
@@ -91,7 +93,7 @@ def bs_sns_bar_x_byfg(
     label_f: str | None = None,
     label_g: str | None = None,
     title: str | None = None,
-) -> tuple[mpl.figure.Figure, mpl.figure.Axes]:
+) -> SeabornGraph:
     """make a bar plot of x by f and g
 
     Args:
@@ -130,7 +132,7 @@ def bs_sns_bar_x_byfg(
         gbar_legend.set_title(label_g)
     if title is not None:
         ax.set_title(title)
-    return gbar
+    return cast(SeabornGraph, gbar)
 
 
 def bs_sns_density_estimates(

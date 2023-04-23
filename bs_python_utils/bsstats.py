@@ -3,10 +3,9 @@ Contains some statistical routines.
 """
 
 from dataclasses import dataclass
-from functools import reduce
 from itertools import combinations_with_replacement
+from typing import cast
 
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as spla
 import scipy.stats as sts
@@ -20,8 +19,7 @@ from bs_python_utils.bsnputils import (
     test_vector_or_matrix,
 )
 from bs_python_utils.bssputils import spline_reg
-from bs_python_utils.bsutils import bs_error_abort, print_stars
-from bs_python_utils.Timer import Timer
+from bs_python_utils.bsutils import bs_error_abort
 
 
 @dataclass
@@ -40,7 +38,7 @@ class TslsResults:
     b_proj_IV: float | np.ndarray | None
 
 
-def _powers_Z(Z: np.ndarray, list_ints: list) -> np.ndarray:
+def _powers_Z(Z: np.ndarray, degrees: np.ndarray) -> np.ndarray:
     """
     used internally by `proj_Z`; returns `\\prod_{k=1}^m  Z_{\\cdot k}^{l_k}`
 
@@ -54,23 +52,22 @@ def _powers_Z(Z: np.ndarray, list_ints: list) -> np.ndarray:
     if Z.ndim != 2:
         bs_error_abort(f"Z should have dimension 2, not {Z.ndim}")
     m = Z.shape[1]
-    if len(list_ints) != m:
-        bs_error_abort(
-            "The length of list_ints should equal the number of columns of Z"
-        )
-    i_powers = list(zip(np.arange(m), list_ints, strict=True))
-    return reduce(lambda x, y: x * (Z[:, y[0]] ** y[1]), i_powers, 1)
+    mdegs = test_vector(degrees)
+    if mdegs != m:
+        bs_error_abort("The size of degrees should equal the number of columns of Z")
+    res = np.ones(Z.shape[0])
+    for i, degi in enumerate(degrees):
+        res *= Z[:, i] ** degi
+    return res
 
 
 def _final_proj(Zp: np.ndarray, W: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]:
     MINVAR = 1e-12
     b_proj, _, _, _ = spla.lstsq(Zp, W)
     W_proj = Zp @ b_proj
-    r2 = 1.0
     if W.ndim == 1:
         var_w = np.var(W)
-        if var_w > MINVAR:
-            r2 = np.var(W_proj) / var_w
+        r2 = np.var(W_proj) / var_w if var_w > MINVAR else 1.0
     elif W.ndim == 2:
         nw = W.shape[1]
         r2 = np.ones(nw)
@@ -106,7 +103,7 @@ def _make_Zp(Z: np.ndarray, p: int) -> tuple[np.ndarray, int]:
 
 
 def proj_Z(
-    W: np.ndarray, Z: np.ndarray, p: int | None = 1, verbose: bool | None = False
+    W: np.ndarray, Z: np.ndarray, p: int = 1, verbose: bool = False
 ) -> tuple[np.ndarray, np.ndarray, float]:
     """
     project `W` on `Z` up to degree `p` interactions
@@ -135,11 +132,11 @@ def proj_Z(
         for q in range(1, p + 1):
             Zp[:, q] = Z**q
     else:  # Z is a matrix
-        Zp, k = _make_Zp(Z)
+        Zp, k = _make_Zp(Z, p)
         if verbose:
             print(f"_proj_Z with degree {p}, using {k} regressors")
 
-        return _final_proj(Zp, W)
+    return _final_proj(Zp, W)
 
 
 def tsls(y: np.ndarray, X: np.ndarray, Z: np.ndarray) -> TslsResults:
@@ -158,7 +155,7 @@ def tsls(y: np.ndarray, X: np.ndarray, Z: np.ndarray) -> TslsResults:
     X_IV_proj, b_proj_IV, r2_first_iv = proj_Z(X, Z)
     # second stage
     y_proj, y_coeffs, r2_y = proj_Z(y, Z)
-    y_second, iv_estimates, r2_second = proj_Z(y_proj, X_IV_proj)
+    _, iv_estimates, r2_second = proj_Z(y_proj, X_IV_proj)
     return TslsResults(
         iv_estimates,
         r2_first_iv,
@@ -177,27 +174,25 @@ def reg_nonpar(
     var_types: str | None = None,
     n_sub: int | None = None,
     n_res: int | None = 1,
-):
+) -> tuple[KernelReg, np.ndarray]:
     """
     nonparametric regression of y on the columns of X;
     bandwidth chosen on a subsample of size nsub if nsub < nobs, and rescaled
 
-    :param np.ndarray y: a vector of size nobs
-
-    :param np.ndarray X: a (nobs) vector or a matrix of shape (nobs, m)
-
-    :param str var_types: specify types of all `X` variables if not all of them are continuous; \
+    Args:
+        y: a vector of size nobs
+        np.ndarray X: a (nobs) vector or a matrix of shape (nobs, m)
+        var_types: specify types of all `X` variables if not all of them are continuous; \
      one character per variable
+        * 'c' for continuous
+        * 'u' discrete unordered
+        * 'o' discrete ordered
+        n_sub: size of subsample for cross-validation;  by default it is `200^{(m+4)/5}`
+        n_res: how many subsamples we draw; 1 by default
 
-      * 'c' for continuous
-      * 'u' discrete unordered
-      * 'o' discrete ordered
-
-    :param n_sub: size of subsample for cross-validation;  by default it is `200^{(m+4)/5}`
-
-    :param int n_res: how many subsamples we draw; 1 by default
-
-    Returns: fitted on sample (nobs, with derivatives)  and bandwidths (m)
+    Returns: 
+        fitted on sample (nobs, with derivatives)  
+        and bandwidths (m)
     """
     _ = test_vector_or_matrix(X)
     n_obs = test_vector(y)
@@ -230,8 +225,8 @@ def reg_nonpar_fit(
     X: np.ndarray,
     var_types: str | None = None,
     n_sub: int | None = None,
-    n_res: int | None = 1,
-    verbose: bool | None = False,
+    n_res: int = 1,
+    verbose: bool = False,
 ) -> np.ndarray:
     """
     nonparametric regression of y on the columns of X; bandwidth chosen on a subsample of size nsub if nsub < nobs, and rescaled
@@ -252,17 +247,18 @@ def reg_nonpar_fit(
         fitted values on sample (nobs)
     """
     kfbw = reg_nonpar(y, X, var_types, n_sub, n_res)
-    return kfbw[0][0]
+    fitted_vals = cast(np.ndarray, kfbw[0][0])
+    return fitted_vals
 
 
 def flexible_reg(
     Y: np.ndarray,
     X: np.ndarray,
-    mode: str | None = "NP",
+    mode: str = "NP",
     var_types: str | None = None,
     n_sub: int | None = None,
-    n_res: int | None = 1,
-    verbose: bool | None = False,
+    n_res: int = 1,
+    verbose: bool = False,
 ):
     """
     flexible regression  of `Y` on `X`
@@ -309,7 +305,7 @@ def flexible_reg(
     elif mode == "SPL":
         if X.ndim > 1:
             bs_error_abort("with a spline, only works in one dimension")
-        return spline_reg(Y, X, verbose=verbose)
+        return spline_reg(Y, X)
     else:
         try:
             imode = int(mode)
@@ -341,7 +337,8 @@ def bs_multivariate_normal_pdf(
         #     bs_error_abort(f"cov_mat should be a float as values_x is a vector")
         sigma2 = cov_mat
         resid = values_x - means_x
-        return np.exp(-0.5 * resid * resid / sigma2) / np.sqrt(2 * np.pi * sigma2)
+        dval = np.exp(-0.5 * resid * resid / sigma2) / np.sqrt(2 * np.pi * sigma2)
+        return cast(np.ndarray, dval)
     else:  # we are evaluating a multivariate normal
         n, nvars = values_x.shape
         n_means = test_vector(means_x, "bs_multivariate_normal_pdf")
@@ -357,16 +354,17 @@ def bs_multivariate_normal_pdf(
         argexp = np.zeros(n)
         for i in range(n):
             argexp[i] = np.dot(resid[i, :], argresid[:, i])
-        return np.exp(-0.5 * argexp) / np.sqrt(
+        dval = np.exp(-0.5 * argexp) / np.sqrt(
             ((2 * np.pi) ** nvars) * spla.det(cov_mat)
         )
+        return cast(np.ndarray, dval)
 
 
 def estimate_pdf(
     x_obs: np.ndarray,
     x_points: np.ndarray,
-    MIN_SIZE_NONPAR: int | None = 200,
-    weights: np.ndarray = None,
+    MIN_SIZE_NONPAR: int = 200,
+    weights: np.ndarray | None = None,
 ) -> np.ndarray:
     """
     return an estimate of the conditional densities of `x` at points `values_x` (Silverman rule)
@@ -427,8 +425,7 @@ def estimate_pdf(
             f_x = bs_multivariate_normal_pdf(x_points, means_x, cov_mat)
         if weights is not None:
             f_x *= weights / np.mean(weights)
-
-    return f_x
+    return cast(np.ndarray, f_x)
 
 
 def estimate_densities_at_quantiles(
@@ -464,82 +461,3 @@ def estimate_densities_at_quantiles(
         values_X = make_lexico_grid(nodes_mat)
         f_X = estimate_pdf(X, values_X)  # joint density
         return f_margins, f_X, values_X
-
-
-if __name__ == "__main__":
-    test_estimate_pdf = True
-    test_density_qtiles = False
-    test_npreg = False
-
-    nobs = 10000
-    z = np.random.normal(size=nobs)
-
-    ym = z * z - 3 * z + 1.0
-    y = ym + np.random.normal(size=nobs)
-    X = z
-
-    yq = flexible_reg(y, np.column_stack((X, X * X, X * X * X)), mode="2", verbose=True)
-
-    if test_npreg:
-        with Timer() as t:
-            y_LLR2 = flexible_reg(y, np.column_stack((X, X * z)), mode="NP")
-        print(f"LLR2 took {t.elapsed} seconds")
-
-        with Timer() as t:
-            y_LLR = flexible_reg(y, X, mode="NP")
-        print(f"LLR took {t.elapsed} seconds")
-
-    y_lin = flexible_reg(y, X, mode="1")
-    y_quad = flexible_reg(y, X, mode="2")
-    y_cubic = flexible_reg(y, X, mode="3")
-    y_spline = flexible_reg(y, X, mode="SPL")
-
-    z_isort = np.argsort(z)
-    zs = z[z_isort]
-
-    plt.clf()
-    if test_npreg:
-        plt.plot(zs, y_LLR[z_isort], color="red", label="LLR")
-        plt.plot(zs, y_LLR2[z_isort], color="pink", label="LLR2")
-    plt.plot(zs, y_lin[z_isort], color="b", label="linear")
-    plt.plot(zs, y_quad[z_isort], color="g", label="quadratic")
-    plt.plot(zs, y_cubic[z_isort], color="c", label="cubic")
-    plt.plot(zs, y_spline[z_isort], color="m", label="spline")
-
-    plt.plot(zs, ym[z_isort], "-k")
-    plt.legend()
-    plt.show()
-
-    if test_estimate_pdf:
-        n = 1000000
-        X = np.random.normal(size=n)
-        values_X = np.arange(6)
-        f_X = estimate_pdf(X, values_X)
-        check_f = bs_multivariate_normal_pdf(values_X, 0.0, 1.0)
-        print_stars(" estimated density of  N(0,1):")
-        print(" x_point:    estimated  true")
-        for i, v in enumerate(values_X):
-            print(f" {v:5.2f} {f_X[i]:10.5f} {check_f[i]:10.5f}")
-
-        X = np.random.normal(size=(n, 2))
-        values_X = np.arange(6).reshape((3, 2))
-        f_X = estimate_pdf(X, values_X)
-        check_f = bs_multivariate_normal_pdf(values_X, np.zeros(2), np.eye(2))
-        print_stars(" estimated density of N(0,I_2):")
-        print(" x_point:    estimated  true")
-        for i in range(3):
-            v1, v2 = values_X[i, :]
-            print(f" {v1:5.2f}, {v2:5.2f}:  {f_X[i]:10.5f} {check_f[i]:10.5f}")
-
-    if test_density_qtiles:
-        n = 10000
-        X = np.random.normal(size=(n, 2))
-        qtiles = np.arange(1, 4) / 4.0
-        f_margins, f_joint, lgrid = estimate_densities_at_quantiles(X, qtiles)
-        print_stars(" estimated density N(0,I_2) at three quartiles:")
-        print("     grid:")
-        print(lgrid)
-        print("     margins:")
-        print(f_margins)
-        print("     joint:")
-        print(f_joint)

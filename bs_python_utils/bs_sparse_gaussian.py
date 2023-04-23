@@ -1,14 +1,14 @@
 """
 sets up sparse integration over a Gaussian
 """
-import os
+from pathlib import Path
 
 import numpy as np
 
 from bs_python_utils.bsutils import bs_error_abort
 
 
-def setup_sparse_gaussian(ndims: int, iprec: int, GHsparsedir: str = None):
+def setup_sparse_gaussian(ndims: int, iprec: int, GHsparsedir: str | None = None):
     """
     get nodes and weights for sparse integration Ef(X) with X = N(0,1) in `ndims` dimensions
 
@@ -22,17 +22,18 @@ def setup_sparse_gaussian(ndims: int, iprec: int, GHsparsedir: str = None):
         a pair of  arrays `nodes` and `weights`; \
         `nodes` has `ndims`-1 columns and weights is a vector
     """
-    if GHsparsedir is None:
-        GHsparsedir = os.path.join(os.getenv("HOME"), "Dropbox/GHsparseGrids")
+    GHdir = (
+        Path.home() / "Dropbox" / "GHsparseGrids"
+        if GHsparsedir is None
+        else Path(GHsparsedir)
+    )
     if iprec not in [9, 13, 17]:
         bs_error_abort(
             f"We only do sparse integration with precision 9, 13, or 17, not {iprec}"
         )
 
     if ndims in [1, 2, 3, 4, 5]:
-        grid = np.loadtxt(
-            os.path.join(GHsparsedir, f"GHsparseGrid{ndims}prec" + str(iprec) + ".txt")
-        )
+        grid = np.loadtxt(GHdir / f"GHsparseGrid{ndims}prec{iprec}.txt")
         weights = grid[:, 0]
         nodes = grid[:, 1:]
         return nodes, weights

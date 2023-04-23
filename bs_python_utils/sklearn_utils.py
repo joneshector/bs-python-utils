@@ -2,6 +2,7 @@
 Cntains various `scikit-learn` utility programs.
 """
 
+from typing import cast
 
 import numpy as np
 from sklearn.linear_model import Lasso
@@ -9,7 +10,7 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
 
 def skl_npreg_lasso(
-    y: np.ndarray, X: np.ndarray, alpha: float, degree: int | None = 4
+    y: np.ndarray, X: np.ndarray, alpha: float, degree: int = 4
 ) -> np.ndarray:
     """
     Lasso nonparametric regression of `y` over polynomials of `X`
@@ -34,7 +35,7 @@ def skl_npreg_lasso(
     # now run Lasso
     reg = Lasso(alpha=alpha).fit(X_poly, y)
     expy_X = reg.predict(X_poly)
-    return expy_X
+    return cast(np.ndarray, expy_X)
 
 
 def plot_lasso_path(y: np.ndarray, X: np.ndarray, eps: float = 1e-3) -> None:
@@ -95,7 +96,7 @@ if __name__ == "__main__":
     # Create the features and fit
     X_poly = pf.fit_transform(X_scaled)
 
-    y_pred = skl_npreg_lasso(y, X)
+    y_pred = skl_npreg_lasso(y, X, alpha=0.001)
 
     plt.clf()
 

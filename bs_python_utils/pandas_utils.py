@@ -202,6 +202,7 @@ def _test_names_n(col_names: list[str]) -> list[int]:
         bs_error_abort(
             "If a column name ends with '_n' where n is an integer,  then all should."
         )
+        return []  # for mypy
 
 
 def bspd_prepareplot(df: pd.DataFrame) -> pd.DataFrame:

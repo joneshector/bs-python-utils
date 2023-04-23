@@ -4,7 +4,7 @@ Contains various `numpy` utility programs.
 
 import sys
 from math import cos, exp, floor, log, pi, sqrt
-from typing import Callable, Iterable
+from typing import Any, Callable, Iterable, cast
 
 import numpy as np
 from numpy.polynomial import Polynomial
@@ -22,7 +22,7 @@ SixArrays = tuple[
 
 # Numpy parallel RNG
 def generate_RNG_streams(
-    nsim: int, initial_seed: int | None = 13091962
+    nsim: int, initial_seed: int = 13091962
 ) -> list[np.random.Generator]:
     """
     return `nsim` RNGs
@@ -88,11 +88,16 @@ def inv_ecdf(v: np.ndarray, q: np.ndarray | float) -> np.ndarray | float:
     if isinstance(q, float):
         q = np.array([q])
         q_floor = floor(nv * q)
+        val_q = sorted_v[q_floor] + (nv * q - q_floor) * (
+            sorted_v[q_floor + 1] - sorted_v[q_floor]
+        )
+        return cast(float, val_q)
     elif isinstance(q, np.ndarray):
         q_floor = np.floor(nv * q).astype(int)
-    return sorted_v[q_floor] + (nv * q - q_floor) * (
-        sorted_v[q_floor + 1] - sorted_v[q_floor]
-    )
+        vals_q = sorted_v[q_floor] + (nv * q - q_floor) * (
+            sorted_v[q_floor + 1] - sorted_v[q_floor]
+        )
+        return cast(np.ndarray, vals_q)
 
 
 def nprepeat_col(v: np.ndarray, n: int) -> np.ndarray:
@@ -133,11 +138,11 @@ def npmaxabs(arr: np.ndarray) -> float:
     Returns:
         the largest element in absolute value
     """
-    return np.max(np.abs(arr))
+    return cast(float, np.max(np.abs(arr)))
 
 
 def rice_stderr(
-    y: np.ndarray, x: np.ndarray, is_sorted: bool | None = False
+    y: np.ndarray, x: np.ndarray, is_sorted: bool = False
 ) -> np.ndarray | float:
     """
     computes the Rice local estimators of the standard error of y | x
@@ -194,9 +199,9 @@ def rice_stderr(
 
 def nplog(
     arr: np.ndarray,
-    eps: float | None = 1e-30,
-    deriv: int | None = 0,
-    verbose: bool | None = False,
+    eps: float = 1e-30,
+    deriv: int = 0,
+    verbose: bool = False,
 ) -> np.ndarray | TwoArrays | ThreeArrays:
     """
     `C^2` extension of  `\\ln(a)` below `eps`, perhaps with derivatives
@@ -214,11 +219,11 @@ def nplog(
         bs_error_abort(f"deriv can only be 0, 1, or 2; not {deriv}")
     if np.min(arr) > eps:
         if deriv == 0:
-            return np.log(arr)
+            return cast(np.ndarray, np.log(arr))
         elif deriv == 1:
-            return np.log(arr), 1.0 / arr
-        elif deriv == 2:
-            return np.log(arr), 1.0 / arr, -1.0 / (arr * arr)
+            return cast(TwoArrays, (np.log(arr), 1.0 / arr))
+        # deriv == 2
+        return cast(ThreeArrays, (np.log(arr), 1.0 / arr, -1.0 / (arr * arr)))
     else:
         logarreps = np.log(np.maximum(arr, eps))
         darr = 1.0 - arr / eps
@@ -239,19 +244,20 @@ def nplog(
         der_logarr_smaller = (1.0 + darr) / eps
         dlogeps = np.where(arr > eps, der_logarreps, der_logarr_smaller)
         if deriv == 1:
-            return logeps, dlogeps
+            return cast(TwoArrays, (logeps, dlogeps))
+        # deriv == 2
         der2_logarreps = -1.0 / (arreps * arreps)
         der2_logarr_smaller = np.full(arr.shape, -1.0 / (eps * eps))
         d2logeps = np.where(arr > eps, der2_logarreps, der2_logarr_smaller)
-        return logeps, dlogeps, d2logeps
+        return cast(ThreeArrays, (logeps, dlogeps, d2logeps))
 
 
 def npexp(
     arr: np.ndarray,
-    bigx: float | None = 50.0,
-    lowx: float | None = -50.0,
-    deriv: int | None = 0,
-    verbose: bool | None = False,
+    bigx: float = 50.0,
+    lowx: float = -50.0,
+    deriv: int = 0,
+    verbose: bool = False,
 ) -> np.ndarray | TwoArrays | ThreeArrays:
     """
     `C^2` extension of  `\\exp(a)` above `bigx` and below `lowx`,
@@ -275,11 +281,11 @@ def npexp(
     if max_arr <= bigx and min_arr >= lowx:
         exparr = np.exp(arr)
         if deriv == 0:
-            return exparr
+            return cast(np.ndarray, exparr)
         elif deriv == 1:
-            return exparr, exparr
-        elif deriv == 2:
-            return exparr, exparr, exparr
+            return cast(TwoArrays, (exparr, exparr))
+        # deriv == 2
+        return cast(ThreeArrays, (exparr, exparr, exparr))
     else:  # some large and/or small arguments
         exparr = np.exp(np.maximum(np.minimum(arr, bigx), lowx))
         print(f"{exparr=}")
@@ -307,17 +313,17 @@ def npexp(
         expval = np.where(arr > bigx, exparr_larger, expval)
         expval = np.where(arr < lowx, exparr_smaller, expval)
         if deriv == 0:
-            return expval
+            return cast(np.ndarray, expval)
         dexpval = exparr
         dexparr_larger = ebigx * (1.0 + darrb)
         dexparr_smaller = elowx * (1.0 - darrl)
         dexpval = np.where(arr > bigx, dexparr_larger, dexpval)
         dexpval = np.where(arr < lowx, dexparr_smaller, dexpval)
         if deriv == 1:
-            return expval, dexpval
-        if deriv == 2:
-            d2expval = exparr
-            return expval, dexpval, d2expval
+            return cast(TwoArrays, (expval, dexpval))
+        # deriv == 2
+        d2expval = exparr
+        return cast(ThreeArrays, (expval, dexpval, d2expval))
 
 
 def _nppow_arrays(
@@ -329,13 +335,14 @@ def _nppow_arrays(
     a_pow_b = avec**bvec
     a_pow_br = a_pow_b.reshape(a.shape)
     if deriv == 0:
-        return a_pow_br
+        return cast(np.ndarray, a_pow_br)
     der_wrt_a = a_pow_b * bvec / avec
     log_avec = nplog(avec)
     der_wrt_b = a_pow_b * log_avec
     derivs1 = (der_wrt_a.reshape(a.shape), der_wrt_b.reshape(a.shape))
     if deriv == 1:
-        return a_pow_br, *derivs1
+        return cast(ThreeArrays, (a_pow_br, *derivs1))
+    # deriv == 2
     a_pow_b1 = a_pow_b / avec
     b1 = bvec - 1.0
     der2_wrt_aa = bvec * b1 * a_pow_b1 / avec
@@ -346,12 +353,11 @@ def _nppow_arrays(
         der2_wrt_ab.reshape(a.shape),
         der2_wrt_bb.reshape(a.shape),
     )
-    if deriv == 2:
-        return a_pow_br, *derivs1, *derivs2
+    return cast(SixArrays, (a_pow_br, *derivs1, *derivs2))
 
 
 def nppow(
-    a: np.ndarray, b: int | float | np.ndarray, deriv: int | None = 0
+    a: np.ndarray, b: int | float | np.ndarray, deriv: int = 0
 ) -> np.ndarray | ThreeArrays | SixArrays:
     """
     evaluates a**b element-by-element, perhaps with derivatives
@@ -376,16 +382,16 @@ def nppow(
         log_a = np.log(a)
         derivs1 = (b * a_pow_b / a, a_pow_b * log_a)
         if deriv == 1:
-            return a_pow_b, *derivs1
+            return cast(ThreeArrays, (a_pow_b, *derivs1))
         b1 = b - 1.0
         a_pow_b1 = a_pow_b / a
-        if deriv == 2:
-            derivs2 = (
-                b * b1 * a_pow_b1 / a,
-                a_pow_b1 * (1.0 + b * log_a),
-                a_pow_b * log_a * log_a,
-            )
-            return a_pow_b, *derivs1, *derivs2
+        # deriv == 2
+        derivs2 = (
+            b * b1 * a_pow_b1 / a,
+            a_pow_b1 * (1.0 + b * log_a),
+            a_pow_b * log_a * log_a,
+        )
+        return cast(SixArrays, (a_pow_b, *derivs1, *derivs2))
     else:
         if a.shape != b.shape:
             bs_error_abort("b is not a number or an array of the same shape as a!")
@@ -489,7 +495,7 @@ def bsgrid(v: np.ndarray, w: np.ndarray) -> np.ndarray:
     """
 
 
-def test_vector(v: np.ndarray, fun_name: str | None = None) -> int:
+def test_vector(v: Any, fun_name: str = None) -> int:
     """
     test that `v` is a vector; aborts otherwise
 
@@ -503,13 +509,14 @@ def test_vector(v: np.ndarray, fun_name: str | None = None) -> int:
     fun_str = ["" if fun_name is None else fun_name + ":"]
     if not isinstance(v, np.ndarray):
         bs_error_abort(f"{fun_str} v should be a Numpy array")
+    v = cast(np.ndarray, v)
     ndims_v = v.ndim
     if ndims_v != 1:
         bs_error_abort(f"{fun_str} v should have one dimension, not {ndims_v}")
-    return v.size
+    return cast(int, v.size)
 
 
-def test_matrix(x: np.ndarray, fun_name: str | None = None) -> tuple[int, int]:
+def test_matrix(x: Any, fun_name: str = None) -> tuple[int, int]:
     """
     test that `x` is a matrix; aborts otherwise
 
@@ -523,13 +530,14 @@ def test_matrix(x: np.ndarray, fun_name: str | None = None) -> tuple[int, int]:
     fun_str = ["" if fun_name is None else fun_name + ":"]
     if not isinstance(x, np.ndarray):
         bs_error_abort(f"{fun_str} Xx should be a Numpy array")
+    x = cast(np.ndarray, x)
     ndims_x = x.ndim
     if ndims_x != 2:
         bs_error_abort(f"{fun_str} x should have two dimensions, not {ndims_x}")
-    return x.shape
+    return cast(tuple[int, int], x.shape)
 
 
-def test_vector_or_matrix(x: np.ndarray, fun_name: str | None = None) -> int:
+def test_vector_or_matrix(x: Any, fun_name: str = None) -> int:
     """
     test that `x` is a vector or a matrix; aborts otherwise
 
@@ -543,10 +551,11 @@ def test_vector_or_matrix(x: np.ndarray, fun_name: str | None = None) -> int:
     fun_str = ["" if fun_name is None else fun_name + ":"]
     if not isinstance(x, np.ndarray):
         bs_error_abort(f"{fun_str} X should be a Numpy array")
+    x = cast(np.ndarray, x)
     ndims_x = x.ndim
     if ndims_x != 1 and ndims_x != 2:
         bs_error_abort(f"{fun_str} x should have at most two dimensions, not {ndims_x}")
-    return ndims_x
+    return cast(int, ndims_x)
 
 
 def bs_sqrt_pdmatrix(m: np.ndarray) -> np.ndarray:
@@ -565,12 +574,12 @@ def bs_sqrt_pdmatrix(m: np.ndarray) -> np.ndarray:
     eigval_sqrt = np.sqrt(eigval)
     eigval_sqrt_diag = np.diag(eigval_sqrt)
     res = eigvec @ eigval_sqrt_diag @ eigvec.T
-    return res
+    return cast(np.ndarray, res)
 
 
-def test_square(A: np.ndarray, fun_name: str | None = None) -> int:
+def test_square(A: Any, fun_name: str | None) -> int:
     """
-    test that a matrix used in `fun_name` is square
+    test that an object used in `fun_name` is a square matrix
 
     Args:
         A: square matrix, we hope
@@ -582,16 +591,17 @@ def test_square(A: np.ndarray, fun_name: str | None = None) -> int:
     fun_str = ["" if fun_name is None else fun_name + ":"]
     if not isinstance(A, np.ndarray):
         bs_error_abort(f"{fun_str} A should be a Numpy array")
+    A = cast(np.ndarray, A)
     if A.ndim == 2:
         n, nv = A.shape
         if nv != n:
             bs_error_abort(f"{fun_str} The matrix A should be square, not {A.shape}")
     else:
         bs_error_abort(f"{fun_name} A should have  two dimensions, not {A.ndim}")
-    return n
+    return cast(int, n)
 
 
-def test_tensor(x: np.ndarray, n_dims: int, fun_name: str | None = None) -> tuple[int]:
+def test_tensor(x: Any, n_dims: int, fun_name: str | None) -> tuple[int, ...]:
     """
     test that `x` is an `n_dims` dimensional array; aborts otherwise
 
@@ -605,10 +615,12 @@ def test_tensor(x: np.ndarray, n_dims: int, fun_name: str | None = None) -> tupl
     fun_str = ["" if fun_name is None else fun_name + ":"]
     if not isinstance(x, np.ndarray):
         bs_error_abort(f"{fun_str} x should be a Numpy array")
+    x = cast(np.ndarray, x)
     ndims_x = x.ndim
     if ndims_x != n_dims:
         bs_error_abort(f"{fun_str} x should have {n_dims} dimensions, not {ndims_x}")
-    return x.shape
+        return (0,)  # for mypy
+    return cast(tuple[int, ...], x.shape)
 
 
 def make_lexico_grid(arr: np.ndarray) -> np.ndarray:
@@ -641,6 +653,7 @@ def make_lexico_grid(arr: np.ndarray) -> np.ndarray:
             bs_error_abort(
                 f"at this stage, the number of columns must be 3 or less, not {nc}..."
             )
+            return arr  # for mypy
 
 
 class BivariatePolynomial:
@@ -751,10 +764,10 @@ def outer_bivar(pol1: Polynomial, pol2: Polynomial) -> BivariatePolynomial:
 
 def npxlogx(
     arr: np.ndarray,
-    eps: float | None = 1e-30,
-    deriv: int | None = 0,
-    verbose: bool | None = False,
-) -> np.ndarray:
+    eps: float = 1e-30,
+    deriv: int = 0,
+    verbose: bool = False,
+) -> np.ndarray | TwoArrays | ThreeArrays:
     """
     C^2` extension of  `a\\ln(a)` below `eps`, perhaps with derivatives
 
@@ -770,7 +783,7 @@ def npxlogx(
     if deriv not in [0, 1, 2]:
         bs_error_abort(f"deriv must be 0, 1, or 2; not {deriv}")
     if np.min(arr) > eps:
-        return arr * np.log(arr)
+        return cast(np.ndarray, arr * np.log(arr))
     else:
         logeps = log(eps)
         logarreps = np.log(np.maximum(arr, eps))
@@ -791,10 +804,10 @@ def npxlogx(
         dxlogarr_smaller = logeps + arr / eps
         dxlogval = np.where(arr > eps, dxlogarreps, dxlogarr_smaller)
         if deriv == 1:
-            return xlogval, dxlogval
-        if deriv == 2:
-            d2xlogval = 1.0 / np.maximum(arr, eps)
-            return xlogval, dxlogval, d2xlogval
+            return cast(TwoArrays, (xlogval, dxlogval))
+        # deriv == 2
+        d2xlogval = 1.0 / np.maximum(arr, eps)
+        return cast(ThreeArrays, (xlogval, dxlogval, d2xlogval))
 
 
 def gauher(n: int) -> TwoArrays:
@@ -848,7 +861,7 @@ def gauher(n: int) -> TwoArrays:
         w[n - 1 - i] = w[i]
 
     # need to reverse order for x (w is symmetric)
-    return x[::-1], w
+    return cast(TwoArrays, (x[::-1], w))
 
 
 def gauleg(n: int) -> TwoArrays:
@@ -883,21 +896,21 @@ def gauleg(n: int) -> TwoArrays:
         w[i - 1] = 2.0 / ((1.0 - z * z) * pp * pp)
         w[n - i] = w[i - 1]
 
-    return x, w
+    return cast(TwoArrays, (x, w))
 
 
 def gaussian_expectation(
     f: Callable,
-    vectorized: bool | None = False,
-    pars: Iterable | None = None,
-    n: int | None = 16,
-    x: np.ndarray | None = None,
-    w: np.ndarray | None = None,
+    x: np.ndarray | None,
+    w: np.ndarray | None,
+    n: int = 16,
+    vectorized: bool = False,
+    pars: Iterable = None,
 ) -> np.ndarray | float:
     """
     computes the expectation of a function of an `N(0,1)` random variable
-     using Gauss-Hermite with n nodes
-     the nodes and weights can be provided, if available
+    using Gauss-Hermite with n nodes
+    the nodes and weights can be provided, if available
 
     Args:
         f: a scalar or array function of a scalar or array variable and possibly other parameters
@@ -925,7 +938,7 @@ def gaussian_expectation(
         n_nodes = nodes.size
     if pars is None:
         if vectorized:
-            integral_val = f(nodes) @ weights
+            integral_vec = f(nodes) @ weights
         else:
             # to ensure integral_val has the same shape as f
             integral_val = weights[0] * f(nodes[0])
@@ -933,11 +946,11 @@ def gaussian_expectation(
                 integral_val += weights[i] * f(nodes[i])
     else:
         if vectorized:
-            integral_val = f(nodes, pars) @ weights
+            integral_vec = f(nodes, pars) @ weights
         else:
             # to ensure integral_val has the same shape as f
             integral_val = weights[0] * f(nodes[0], pars)
             for i in range(1, n_nodes):
                 integral_val += weights[i] * f(nodes[i], pars)
 
-    return integral_val
+    return cast(np.ndarray, integral_vec) if vectorized else cast(float, integral_val)

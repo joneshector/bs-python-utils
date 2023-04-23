@@ -6,7 +6,7 @@ import traceback
 from functools import wraps
 from math import exp, factorial, log, sqrt
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, cast
 
 TwoFloats = tuple[float, float]
 ThreeFloats = tuple[float, float, float]
@@ -41,8 +41,8 @@ def bs_name_func(back: int = 2) -> str:
         the name of the function
     """
     stack = traceback.extract_stack()
-    filename, codeline, func_name, text = stack[-back]
-    return func_name
+    *_, func_name, _ = stack[-back]
+    return cast(str, func_name)
 
 
 def bs_error_abort(msg: str = "error, aborting") -> None:
@@ -131,7 +131,7 @@ def find_first(iterable: Iterable, condition: Callable = lambda x: True) -> Any:
     return next((i, x) for i, x in enumerate(iterable) if condition(x))
 
 
-def print_stars(title: str = None, n: int | None = 70) -> None:
+def print_stars(title: str = None, n: int = 70) -> None:
     """
     prints a title within stars
 
@@ -212,11 +212,11 @@ def bscomb(n: int, k: int) -> int:
         bs_error_abort(f"k should be an integer, not {k}")
     if n < k:
         bs_error_abort(f"k={k} should not be larger than n={n}")
-    return factorial(n) / factorial(k) / factorial(n - k)
+    return factorial(n) // (factorial(k) * factorial(n - k))
 
 
 def bslog(
-    x: float, eps: float | None = 1e-30, deriv: int | None = 0
+    x: float, eps: float = 1e-30, deriv: int = 0
 ) -> float | TwoFloats | ThreeFloats:
     """
     extends the logarithm below `eps` by taking a second-order approximation
@@ -240,8 +240,7 @@ def bslog(
         if deriv == 1:
             return logx, dlogx
         d2logx = -dlogx * dlogx
-        if deriv == 2:
-            return logx, dlogx, d2logx
+        return logx, dlogx, d2logx
     else:
         dx = 1.0 - x / eps
         log_smaller = log(eps) - dx - dx * dx / 2.0
@@ -251,12 +250,11 @@ def bslog(
         if deriv == 1:
             return log_smaller, dlog_smaller
         d2log_smaller = -1.0 / eps / eps
-        if deriv == 2:
-            return log_smaller, dlog_smaller, d2log_smaller
+        return log_smaller, dlog_smaller, d2log_smaller
 
 
 def bsxlogx(
-    x: float, eps: float | None = 1e-30, deriv: int | None = 0
+    x: float, eps: float = 1e-30, deriv: int = 0
 ) -> float | TwoFloats | ThreeFloats:
     """
     extends `x \\ln(x)` below `eps` by making it go to zero in a `C^2` extension
@@ -278,8 +276,7 @@ def bsxlogx(
             return x * logx
         if deriv == 1:
             return x * logx, 1.0 + logx
-        if deriv == 2:
-            return x * logx, 1.0 + logx, 1.0 / x
+        return x * logx, 1.0 + logx, 1.0 / x
     else:
         logeps = log(eps)
         dx = x / eps
@@ -288,8 +285,7 @@ def bsxlogx(
             return log_smaller
         if deriv == 1:
             return log_smaller, logeps + dx
-        if deriv == 2:
-            return log_smaller, logeps + dx, 1.0 / eps
+        return log_smaller, logeps + dx, 1.0 / eps
 
 
 def _bsexp_extend(x: float, deriv: int, limx: float) -> float | TwoFloats | ThreeFloats:
@@ -302,15 +298,15 @@ def _bsexp_extend(x: float, deriv: int, limx: float) -> float | TwoFloats | Thre
     dexp_extend = elimx * (1.0 + dx)
     if deriv == 1:
         return exp_extend, dexp_extend
-    if deriv == 2:
-        return exp_extend, dexp_extend, elimx
+    # deriv = 2
+    return exp_extend, dexp_extend, elimx
 
 
 def bsexp(
     x: float,
-    bigx: float | None = 50.0,
-    lowx: float | None = -50.0,
-    deriv: int | None = 0,
+    bigx: float = 50.0,
+    lowx: float = -50.0,
+    deriv: int = 0,
 ) -> float | TwoFloats | ThreeFloats:
     """
     `C^2`-extends the exponential above `bigx` and below `lowx`
@@ -334,8 +330,7 @@ def bsexp(
             return expx
         if deriv == 1:
             return expx, expx
-        if deriv == 2:
-            return expx, expx, expx
+        return expx, expx, expx
     elif x < lowx:
         return _bsexp_extend(x, deriv, lowx)
     else:
