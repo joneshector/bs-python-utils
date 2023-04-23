@@ -2,11 +2,9 @@
 Contains some statistical routines.
 """
 
-import sys
 from dataclasses import dataclass
 from functools import reduce
 from itertools import combinations_with_replacement
-from typing import Tuple, Union, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -32,14 +30,14 @@ class TslsResults:
     contains full results of a TSLS regression
     """
 
-    iv_estimates: Union[float, np.ndarray, None]
-    r2_first_iv: Union[float, np.ndarray, None]
-    r2_y: Union[float, None]
-    r2_second: Union[float, np.ndarray, None]
-    y_proj: Union[float, np.ndarray, None]
-    y_coeffs: Union[float, np.ndarray, None]
-    X_IV_proj: Union[float, np.ndarray, None]
-    b_proj_IV: Union[float, np.ndarray, None]
+    iv_estimates: float | np.ndarray | None
+    r2_first_iv: float | np.ndarray | None
+    r2_y: float | None
+    r2_second: float | np.ndarray | None
+    y_proj: float | np.ndarray | None
+    y_coeffs: float | np.ndarray | None
+    X_IV_proj: float | np.ndarray | None
+    b_proj_IV: float | np.ndarray | None
 
 
 def _powers_Z(Z: np.ndarray, list_ints: list) -> np.ndarray:
@@ -53,65 +51,18 @@ def _powers_Z(Z: np.ndarray, list_ints: list) -> np.ndarray:
     Returns:
         the product of the powers of `Z`
     """
-    assert Z.ndim == 2, f"powers_Z_: Z should have dimension 2"
+    if Z.ndim != 2:
+        bs_error_abort(f"Z should have dimension 2, not {Z.ndim}")
     m = Z.shape[1]
-    assert (
-        len(list_ints) == m
-    ), "The length of list_ints should equal the number of columns of Z"
-    i_powers = list(zip(np.arange(m), list_ints))
+    if len(list_ints) != m:
+        bs_error_abort(
+            "The length of list_ints should equal the number of columns of Z"
+        )
+    i_powers = list(zip(np.arange(m), list_ints, strict=True))
     return reduce(lambda x, y: x * (Z[:, y[0]] ** y[1]), i_powers, 1)
 
 
-def proj_Z(
-    W: np.ndarray, Z: np.ndarray, p: Optional[int] = 1, verbose: Optional[bool] = False
-) -> Tuple[np.ndarray, np.ndarray, float]:
-    """
-    project `W` on `Z` up to degree `p` interactions
-
-    Args:
-        W: variable(s) `(nobs)` or `(nobs, nw)`
-        Z: instruments `(nobs) or `(nobs, nz)`;
-             they should **not** include a constant term
-        p: maximum total degree for interactions of the columns of `Z`
-        verbose: prints stuff if True
-
-    Returns:
-        the projections of the columns of `W` on `Z` etc, the coefficients, and the `R^2` of each column
-    """
-
-    nobs = Z.shape[0]
-    assert W.shape[0] == nobs, "proj_Z: W and Z should have the same number of rows"
-    assert W.ndim <= 2, "proj_Z: W should have 1 or 2 dimensions"
-    assert Z.ndim <= 2, "proj_Z: Z should have 1 or 2 dimensions"
-
-    if Z.ndim == 1:
-        Zp = np.zeros((nobs, 1 + p))
-        Zp[:, 0] = np.ones(nobs)
-        for q in range(1, p + 1):
-            Zp[:, q] = Z**q
-    else:  # Z is a matrix
-        m = Z.shape[1]
-        list_vars = list(range(m))
-        MAX_NTERMS = round(nobs / 5)
-        Zp = np.zeros((nobs, MAX_NTERMS))
-        Zp[:, 0] = np.ones(nobs)
-        k = 1
-        for q in range(1, p + 1):
-            listq = list(combinations_with_replacement(list_vars, q))
-            lenq = len(listq)
-            l = np.zeros((m, lenq))
-            for i in range(m):
-                l[i, :] = np.ndarray(list(map(lambda x: x.count(i), listq)))
-            for j in range(lenq):
-                Zp[:, k] = _powers_Z(Z, l[:, j])
-                k += 1
-                assert (
-                    k < MAX_NTERMS
-                ), f"proj_Z: we don't allow more than {MAX_NTERMS} terms"
-        Zp = Zp[:, :k]
-        if verbose:
-            print(f"_proj_Z with degree {p}, using {k} regressors")
-
+def _final_proj(Zp: np.ndarray, W: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]:
     MINVAR = 1e-12
     b_proj, _, _, _ = spla.lstsq(Zp, W)
     W_proj = Zp @ b_proj
@@ -128,8 +79,67 @@ def proj_Z(
             if var_w > MINVAR:
                 r2[i] = np.var(W_proj[:, i]) / var_w
     else:
-        sys.exit("proj_Z: Wrong number of dimensions {W.ndim} for W")
+        bs_error_abort(f"Wrong number of dimensions {W.ndim} for W")
     return W_proj, b_proj, r2
+
+
+def _make_Zp(Z: np.ndarray, p: int) -> tuple[np.ndarray, int]:
+    nobs, m = Z.shape
+    list_vars = list(range(m))
+    MAX_NTERMS = round(nobs / 5)
+    Zp = np.zeros((nobs, MAX_NTERMS))
+    Zp[:, 0] = np.ones(nobs)
+    k = 1
+    for q in range(1, p + 1):
+        listq = list(combinations_with_replacement(list_vars, q))
+        lenq = len(listq)
+        degrees = np.zeros((m, lenq))
+        for i in range(m):
+            degrees[i, :] = np.ndarray([x.count(i) for x in listq])
+        for j in range(lenq):
+            Zp[:, k] = _powers_Z(Z, degrees[:, j])
+            k += 1
+            if k >= MAX_NTERMS:
+                bs_error_abort(f"We don't allow more than {MAX_NTERMS} terms")
+    Zp = Zp[:, :k]
+    return Zp, k
+
+
+def proj_Z(
+    W: np.ndarray, Z: np.ndarray, p: int | None = 1, verbose: bool | None = False
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """
+    project `W` on `Z` up to degree `p` interactions
+
+    Args:
+        W: variable(s) `(nobs)` or `(nobs, nw)`
+        Z: instruments `(nobs) or `(nobs, nz)`;
+             they should **not** include a constant term
+        p: maximum total degree for interactions of the columns of `Z`
+        verbose: prints stuff if True
+
+    Returns:
+        the projections of the columns of `W` on `Z` etc, the coefficients, and the `R^2` of each column
+    """
+    nobs = Z.shape[0]
+    if W.shape[0] != nobs:
+        bs_error_abort("W and Z should have the same number of rows")
+    if W.ndim > 2:
+        bs_error_abort("W should have 1 or 2 dimensions")
+    if Z.ndim > 2:
+        bs_error_abort("Z should have 1 or 2 dimensions")
+
+    if Z.ndim == 1:
+        Zp = np.zeros((nobs, 1 + p))
+        Zp[:, 0] = np.ones(nobs)
+        for q in range(1, p + 1):
+            Zp[:, q] = Z**q
+    else:  # Z is a matrix
+        Zp, k = _make_Zp(Z)
+        if verbose:
+            print(f"_proj_Z with degree {p}, using {k} regressors")
+
+        return _final_proj(Zp, W)
 
 
 def tsls(y: np.ndarray, X: np.ndarray, Z: np.ndarray) -> TslsResults:
@@ -164,9 +174,9 @@ def tsls(y: np.ndarray, X: np.ndarray, Z: np.ndarray) -> TslsResults:
 def reg_nonpar(
     y: np.ndarray,
     X: np.ndarray,
-    var_types: Optional[str] = None,
-    n_sub: Optional[int] = None,
-    n_res: Optional[int] = 1,
+    var_types: str | None = None,
+    n_sub: int | None = None,
+    n_res: int | None = 1,
 ):
     """
     nonparametric regression of y on the columns of X;
@@ -189,17 +199,16 @@ def reg_nonpar(
 
     Returns: fitted on sample (nobs, with derivatives)  and bandwidths (m)
     """
-    assert X.ndim == 1 or X.ndim == 2, "X should be a vector or a matrix"
-    assert y.ndim == 1, "y should be a vector"
-    n_obs = y.size
-    assert X.shape[0] == n_obs, "X and y should have the same number of observations"
+    _ = test_vector_or_matrix(X)
+    n_obs = test_vector(y)
+    if X.shape[0] != n_obs:
+        bs_error_abort("X and y should have the same number of observations")
     m = 1 if X.ndim == 1 else X.shape[1]
     if var_types is None:
         types = "c" * m
     else:
-        assert (
-            len(var_types) == m
-        ), "var_types should have one entry for each column of X"
+        if len(var_types) != m:
+            bs_error_abort("var_types should have one entry for each column of X")
         types = var_types
 
     if n_sub is None:
@@ -219,10 +228,10 @@ def reg_nonpar(
 def reg_nonpar_fit(
     y: np.ndarray,
     X: np.ndarray,
-    var_types: Optional[str] = None,
-    n_sub: Optional[int] = None,
-    n_res: Optional[int] = 1,
-    verbose: Optional[bool] = False,
+    var_types: str | None = None,
+    n_sub: int | None = None,
+    n_res: int | None = 1,
+    verbose: bool | None = False,
 ) -> np.ndarray:
     """
     nonparametric regression of y on the columns of X; bandwidth chosen on a subsample of size nsub if nsub < nobs, and rescaled
@@ -249,11 +258,11 @@ def reg_nonpar_fit(
 def flexible_reg(
     Y: np.ndarray,
     X: np.ndarray,
-    mode: Optional[str] = "NP",
-    var_types: Optional[str] = None,
-    n_sub: Optional[int] = None,
-    n_res: Optional[int] = 1,
-    verbose: Optional[bool] = False,
+    mode: str | None = "NP",
+    var_types: str | None = None,
+    n_sub: int | None = None,
+    n_res: int | None = 1,
+    verbose: bool | None = False,
 ):
     """
     flexible regression  of `Y` on `X`
@@ -299,15 +308,13 @@ def flexible_reg(
             )
     elif mode == "SPL":
         if X.ndim > 1:
-            print(f"flexible_reg with a spline only works in one dimension")
-            sys.exit(1)
+            bs_error_abort("with a spline, only works in one dimension")
         return spline_reg(Y, X, verbose=verbose)
     else:
         try:
             imode = int(mode)
         except TypeError:
-            print(f"flexible_reg does not accept mode={mode}")
-            sys.exit(1)
+            bs_error_abort(f"does not accept mode={mode}")
         preg, _, _ = proj_Z(Y, X, p=imode, verbose=verbose)
         return preg
 
@@ -358,7 +365,7 @@ def bs_multivariate_normal_pdf(
 def estimate_pdf(
     x_obs: np.ndarray,
     x_points: np.ndarray,
-    MIN_SIZE_NONPAR: Optional[int] = 200,
+    MIN_SIZE_NONPAR: int | None = 200,
     weights: np.ndarray = None,
 ) -> np.ndarray:
     """
@@ -426,7 +433,7 @@ def estimate_pdf(
 
 def estimate_densities_at_quantiles(
     X: np.ndarray, qtiles: np.ndarray
-) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray]]:
+) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     estimate densities of margins at prespecified quantiles (Silverman rule)
     and the joint density at each vector of these quantiles
@@ -510,7 +517,7 @@ if __name__ == "__main__":
         f_X = estimate_pdf(X, values_X)
         check_f = bs_multivariate_normal_pdf(values_X, 0.0, 1.0)
         print_stars(" estimated density of  N(0,1):")
-        print(f" x_point:    estimated  true")
+        print(" x_point:    estimated  true")
         for i, v in enumerate(values_X):
             print(f" {v:5.2f} {f_X[i]:10.5f} {check_f[i]:10.5f}")
 
@@ -519,7 +526,7 @@ if __name__ == "__main__":
         f_X = estimate_pdf(X, values_X)
         check_f = bs_multivariate_normal_pdf(values_X, np.zeros(2), np.eye(2))
         print_stars(" estimated density of N(0,I_2):")
-        print(f" x_point:    estimated  true")
+        print(" x_point:    estimated  true")
         for i in range(3):
             v1, v2 = values_X[i, :]
             print(f" {v1:5.2f}, {v2:5.2f}:  {f_X[i]:10.5f} {check_f[i]:10.5f}")

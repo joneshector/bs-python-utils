@@ -2,7 +2,7 @@
 """
 
 from pathlib import Path
-from typing import Callable, List, Union
+from typing import Callable
 
 import altair as alt
 import numpy as np
@@ -14,9 +14,18 @@ from bs_python_utils.bsnputils import test_matrix, test_vector
 from bs_python_utils.bsutils import bs_error_abort, mkdir_if_needed
 
 
-def _maybe_save(ch: alt.Chart, save: str = None):
+def _maybe_save(ch: alt.Chart, save: str | None = None):
     if save is not None:
         alt_save(ch, f"{save}.html")
+
+
+def _add_title(ch: alt.Chart, title: str | None = None) -> alt.Chart:
+    if title is not None:
+        if isinstance(title, str):
+            ch = ch.properties(title=title)
+        else:
+            bs_error_abort(f"title must be a string, not {title}")
+    return ch
 
 
 def alt_scatterplot(
@@ -24,13 +33,13 @@ def alt_scatterplot(
     str_x: str,
     str_y: str,
     time_series: bool = False,
-    save: str = None,
-    xlabel: str = None,
-    ylabel: str = None,
-    size: int = 30,
-    title: str = None,
-    color: str = None,
-    aggreg: str = None,
+    save: str | None = None,
+    xlabel: str | None = None,
+    ylabel: str | None = None,
+    size: int | None = 30,
+    title: str | None = None,
+    color: str | None = None,
+    aggreg: str | None = None,
     selection: bool = False,
 ) -> alt.Chart:
     """
@@ -62,10 +71,7 @@ def alt_scatterplot(
         else:
             bs_error_abort(f"xlabel must be a string, not {xlabel}")
 
-    if aggreg is not None:
-        var_y = f"{aggreg}({str_y}):Q"
-    else:
-        var_y = str_y
+    var_y = f"{aggreg}({str_y}):Q" if aggreg is not None else str_y
 
     if ylabel is not None:
         if isinstance(ylabel, str):
@@ -106,12 +112,7 @@ def alt_scatterplot(
     else:
         ch = alt.Chart(df).mark_circle(size=circles_size).encode(x=var_x, y=var_y)
 
-    if title is not None:
-        if isinstance(title, str):
-            ch = ch.properties(title=title)
-        else:
-            bs_error_abort(f"title must be a string, not {title}")
-
+    ch = _add_title(ch, title)
     _maybe_save(ch, save)
     return ch
 
@@ -121,8 +122,8 @@ def alt_lineplot(
     str_x: str,
     str_y: str,
     time_series: bool = False,
-    save: str = None,
-    aggreg: str = None,
+    save: str | None = None,
+    aggreg: str | None = None,
     **kwargs,
 ) -> alt.Chart:
     """
@@ -140,10 +141,7 @@ def alt_lineplot(
         the `alt.Chart` object
     """
     type_x = "T" if time_series else "Q"
-    if aggreg is not None:
-        var_y = f"{aggreg}({str_y}):Q"
-    else:
-        var_y = str_y
+    var_y = f"{aggreg}({str_y}):Q" if aggreg is not None else str_y
 
     ch = alt.Chart(df).mark_line().encode(x=f"{str_x}:{type_x}", y=var_y)
     if "title" in kwargs:
@@ -153,7 +151,11 @@ def alt_lineplot(
 
 
 def alt_plot_fun(
-    f: Callable, start: float, end: float, npoints: int = 100, save: str = None
+    f: Callable,
+    start: float,
+    end: float,
+    npoints: int | None = 100,
+    save: str | None = None,
 ):
     """
     plots the function `f` from `start` to `end`
@@ -185,7 +187,7 @@ def alt_plot_fun(
     return ch
 
 
-def alt_density(df: pd.DataFrame, str_x: str, save: str = None):
+def alt_density(df: pd.DataFrame, str_x: str, save: str | None = None):
     """
     plots the density of `df[str_x]`
 
@@ -215,7 +217,12 @@ def alt_density(df: pd.DataFrame, str_x: str, save: str = None):
 
 
 def alt_linked_scatterplots(
-    df: pd.DataFrame, str_x1: str, str_x2: str, str_y: str, str_f: str, save: str = None
+    df: pd.DataFrame,
+    str_x1: str,
+    str_x2: str,
+    str_y: str,
+    str_f: str,
+    save: str | None = None,
 ):
     """
     two scatterplots: of `df[str_x1]` vs `df[str_y]` and of `df[str_x2]` vs `df[str_y]`,
@@ -250,7 +257,7 @@ def alt_linked_scatterplots(
 
 
 def alt_scatterplot_with_histo(
-    df: pd.DataFrame, str_x: str, str_y: str, str_f: str, save: str = None
+    df: pd.DataFrame, str_x: str, str_y: str, str_f: str, save: str | None = None
 ):
     """
     scatterplots  `df[str_x]` vs `df[str_y]` with colors as per `df[str_f]`
@@ -300,9 +307,9 @@ def alt_faceted_densities(
     df: pd.DataFrame,
     str_x: str,
     str_f: str,
-    legend_title: str = None,
-    save: str = None,
-    max_cols: int = 4,
+    legend_title: str | None = None,
+    save: str | None = None,
+    max_cols: int | None = 4,
 ):
     """
     plots the density of `df[str_x]` by `df[str_f]` in column facets
@@ -345,8 +352,8 @@ def alt_superposed_lineplot(
     str_y: str,
     str_f: str,
     time_series: bool = False,
-    legend_title: str = None,
-    save: str = None,
+    legend_title: str | None = None,
+    save: str | None = None,
 ) -> alt.Chart:
     """
     plots `df[str_x]` vs `df[str_y]` by `df[str_f]` on one plot
@@ -385,9 +392,9 @@ def alt_superposed_faceted_lineplot(
     str_f: str,
     str_g: str,
     time_series: bool = False,
-    legend_title: str = None,
-    max_cols: int = 5,
-    save: str = None,
+    legend_title: str | None = None,
+    max_cols: int | None = 5,
+    save: str | None = None,
 ) -> alt.Chart:
     """
     plots `df[str_x]` vs `df[str_y]` superposed by `df[str_f]` and faceted by `df[str_g]`
@@ -424,7 +431,11 @@ def alt_superposed_faceted_lineplot(
 
 
 def alt_histogram_by(
-    df: pd.DataFrame, str_x: str, str_y: str, str_agg: str = "mean", save: str = None
+    df: pd.DataFrame,
+    str_x: str,
+    str_y: str,
+    str_agg: str | None = "mean",
+    save: str | None = None,
 ) -> alt.Chart:
     """
     plots a histogram of a statistic of `str_y` by `str_x`
@@ -450,7 +461,7 @@ def alt_histogram_by(
 
 
 def alt_histogram_continuous(
-    df: pd.DataFrame, str_x: str, save: str = None
+    df: pd.DataFrame, str_x: str, save: str | None = None
 ) -> alt.Chart:
     """
     histogram of a continuous variable `df[str_x]`
@@ -474,9 +485,9 @@ def alt_stacked_area(
     str_y: str,
     str_f: str,
     time_series=False,
-    title: str = None,
-    legend_title: str = None,
-    save: str = None,
+    title: str | None = None,
+    legend_title: str | None = None,
+    save: str | None = None,
 ) -> alt.Chart:
     """
     normalized stacked lineplots of `df[str_x]` vs `df[str_y]` by `df[str_f]`
@@ -518,9 +529,9 @@ def alt_stacked_area_facets(
     str_f: str,
     str_g: str,
     time_series: bool = False,
-    max_cols: int = 5,
-    title: str = None,
-    save: str = None,
+    max_cols: int | None = 5,
+    title: str | None = None,
+    save: str | None = None,
 ) -> alt.Chart:
     """
     normalized stacked lineplots of `df[str_x]` vs `df[str_y]` by `df[str_f]`, faceted by `df[str_g]`
@@ -554,7 +565,7 @@ def alt_stacked_area_facets(
 
 
 def _stack_estimates(
-    estimate_names: Union[str, List[str]], estimates: np.ndarray, df: pd.DataFrame
+    estimate_names: str | list[str], estimates: np.ndarray, df: pd.DataFrame
 ) -> pd.DataFrame:
     """
     adds to a dataframe `df` columns with names `estimate_names` for various `estimates of one coefficient
@@ -587,7 +598,7 @@ def _stack_estimates(
             )
         for i_est, est_name in enumerate(estimate_names):
             df1[est_name] = estimates[:, i_est]
-        ordered_estimates = estimate_names + ["True value"]
+        ordered_estimates = [*estimate_names, "True value"]
 
     return df1, ordered_estimates
 
@@ -595,12 +606,12 @@ def _stack_estimates(
 def plot_parameterized_estimates(
     parameter_name: str,
     parameter_values: np.ndarray,
-    coeff_names: Union[str, List[str]],
+    coeff_names: str | list[str],
     true_values: np.ndarray,
-    estimate_names: Union[str, List[str]],
+    estimate_names: str | list[str],
     estimates: np.ndarray,
-    colors: List[str],
-    save: str = None,
+    colors: list[str],
+    save: str | None = None,
 ) -> alt.Chart:
     """
     plots estimates of coefficients, with the true values,  as a function of a parameter; one facet per coefficient
@@ -669,7 +680,7 @@ def plot_parameterized_estimates(
             )
             df1[i_coeff]["Coefficient"] = coeff
 
-        df2 = pd.concat((df1[i_coeff] for i_coeff in range(n_coeffs)))
+        df2 = pd.concat(df1[i_coeff] for i_coeff in range(n_coeffs))
         ordered_colors = colors
         df2m = pd.melt(df2, [parameter_name, "Coefficient"], var_name="Estimate")
         ch = (
@@ -697,14 +708,14 @@ def plot_parameterized_estimates(
 def plot_true_sim_facets(
     parameter_name: str,
     parameter_values: np.ndarray,
-    stat_names: List[str],
+    stat_names: list[str],
     stat_true: np.ndarray,
     stat_sim: np.ndarray,
-    colors: List[str],
-    stat_title: str = "Statistic",
-    subtitle: str = "True vs estimated",
-    ncols: int = 3,
-    save: str = None,
+    colors: list[str],
+    stat_title: str | None = "Statistic",
+    subtitle: str | None = "True vs estimated",
+    ncols: int | None = 3,
+    save: str | None = None,
 ) -> alt.Chart:
     """
     plots simulated and true values of statistics as a function of a parameter; one facet per coefficient
@@ -793,15 +804,15 @@ def plot_true_sim_facets(
 def plot_true_sim2_facets(
     parameter_name: str,
     parameter_values: np.ndarray,
-    stat_names: List[str],
+    stat_names: list[str],
     stat_true: np.ndarray,
     stat_sim1: np.ndarray,
     stat_sim2: np.ndarray,
-    colors: List[str],
-    stat_title: str = "Statistic",
-    subtitle: str = "True vs estimated",
-    ncols: int = 3,
-    save: str = None,
+    colors: list[str],
+    stat_title: str | None = "Statistic",
+    subtitle: str | None = "True vs estimated",
+    ncols: int | None = 3,
+    save: str | None = None,
 ) -> alt.Chart:
     """
     plots simulated values for two methods and true values of statistics as a function of a parameter;
@@ -891,7 +902,7 @@ def plot_true_sim2_facets(
 
 
 def alt_tick_plots(
-    df: pd.DataFrame, list_vars: Union[str, list[str]], save: str = None
+    df: pd.DataFrame, list_vars: str | list[str], save: str | None = None
 ) -> alt.Chart:
     """
     ticks plot the `df` variables in `list_vars`, arranged vertically

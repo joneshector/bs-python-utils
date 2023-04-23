@@ -1,14 +1,15 @@
-from math import sqrt, exp, log, isclose
+from math import exp, isclose, log, sqrt
+
 import numpy as np
 
 from bs_python_utils.bsutils import (
-    bs_switch,
-    find_first,
-    bscomb,
     bs_projection_point,
+    bs_switch,
+    bscomb,
+    bsexp,
     bslog,
     bsxlogx,
-    bsexp,
+    find_first,
 )
 
 

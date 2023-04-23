@@ -1,9 +1,9 @@
 """
 personal library of Matplotlib utility programs.
 """
-
 import matplotlib.axes as axes
-import matplotlib.pyplot as plt
+
+from bs_python_utils.bsutils import bs_error_abort
 
 
 def ax_text(ax: axes.Axes, str_txt: str, x: float, y: float) -> axes.Axes:
@@ -19,8 +19,10 @@ def ax_text(ax: axes.Axes, str_txt: str, x: float, y: float) -> axes.Axes:
     Returns:
         annotated ax
     """
-    assert isinstance(x, float) and 0 <= x <= 1, "x should be between 0.0 and 1.0"
-    assert isinstance(y, float) and 0 <= y <= 1, "y should be between 0.0 and 1.0"
+    if not (isinstance(x, float) and 0 <= x <= 1):
+        bs_error_abort("x should be a number between 0.0 and 1.0")
+    if not (isinstance(y, float) and 0 <= y <= 1):
+        bs_error_abort("y should be a number between 0.0 and 1.0")
     ax.text(
         x,
         y,

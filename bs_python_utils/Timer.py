@@ -4,7 +4,7 @@ utilities to time code
 
 import time
 from functools import wraps
-from typing import Callable
+from typing import Any, Callable, Iterable
 
 
 def timeit(func: Callable) -> Callable:
@@ -13,7 +13,7 @@ def timeit(func: Callable) -> Callable:
     """
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Iterable, **kwargs: dict) -> Any:
         start = time.perf_counter()
         result = func(*args, **kwargs)
         end = time.perf_counter()
@@ -44,33 +44,33 @@ class Timer:
        print(f"{t.elapsed} seconds total")
     """
 
-    def __init__(self, func=time.perf_counter):
+    def __init__(self, func: Callable = time.perf_counter) -> None:
         self.elapsed = 0.0
         self._func = func
         self._start = None
 
-    def start(self):
+    def start(self) -> None:
         if self._start is not None:
             raise RuntimeError("Already started")
         self._start = self._func()
 
-    def stop(self):
+    def stop(self) -> None:
         if self._start is None:
             raise RuntimeError("Not started")
         end = self._func()
         self.elapsed += end - self._start
         self._start = None
 
-    def reset(self):
+    def reset(self) -> None:
         self.elapsed = 0.0
 
     @property
-    def running(self):
+    def running(self) -> bool:
         return self._start is not None
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         self.start()
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, *args: Iterable) -> None:
         self.stop()

@@ -5,7 +5,6 @@ evaluation and tests of independence and conditional independence
 
 from dataclasses import dataclass
 from math import sqrt
-from typing import Optional
 
 import numpy as np
 
@@ -57,7 +56,7 @@ def _compute_distances(T: np.ndarray) -> np.ndarray:
         return np.sqrt(A)
 
 
-def _double_decenter(A: np.ndarray, unbiased: Optional[bool] = False) -> np.ndarray:
+def _double_decenter(A: np.ndarray, unbiased: bool | None = False) -> np.ndarray:
     """
     does double decentering on a square matrix A
 
@@ -80,18 +79,18 @@ def _double_decenter(A: np.ndarray, unbiased: Optional[bool] = False) -> np.ndar
     return A_dd
 
 
-def _dcov_prod(A: np.ndarray, B: np.ndarray, unbiased: Optional[bool] = False) -> float:
+def _dcov_prod(A: np.ndarray, B: np.ndarray, unbiased: bool | None = False) -> float:
     n = test_square(A, "_dcov_prod")
     m = test_square(B, "_dcov_prod")
     if m == n:
         fac3 = (n - 3) if unbiased else n
         return np.sum(A * B) / (n * fac3)
     else:
-        bs_error_abort(f"A and B should be square matrices of the same size")
+        bs_error_abort("A and B should be square matrices of the same size")
 
 
 def dcov_dcor(
-    X: np.ndarray, Y: np.ndarray, unbiased: Optional[bool] = False
+    X: np.ndarray, Y: np.ndarray, unbiased: bool | None = False
 ) -> DcovResults:
     """
     evaluate the distance covariance and correlation of `X` and `Y`
@@ -126,8 +125,8 @@ def dcov_dcor(
 def _dcov_bootstrap(
     X_dd: np.ndarray,
     Y_dd: np.ndarray,
-    unbiased: Optional[bool] = False,
-    ndraws: Optional[int] = 199,
+    unbiased: bool | None = False,
+    ndraws: int | None = 199,
 ) -> np.ndarray:
     """
     use bootstrap on the test statistics of independence
@@ -153,7 +152,7 @@ def _dcov_bootstrap(
     return n * dcov_stats_boot
 
 
-def pvalue_dcov(dcov_results: DcovResults, ndraws: Optional[int] = 199) -> float:
+def pvalue_dcov(dcov_results: DcovResults, ndraws: int | None = 199) -> float:
     """
     test of no dependence between `X` and `Y` given `Z`
 
@@ -207,7 +206,7 @@ def pdcov_pdcor(X: np.ndarray, Y: np.ndarray, Z: np.ndarray) -> PdcovResults:
 
 
 def _pdcovs_bootstrap(
-    X_dd: np.ndarray, Y_dd: np.ndarray, Z_dd: np.ndarray, ndraws: Optional[int] = 199
+    X_dd: np.ndarray, Y_dd: np.ndarray, Z_dd: np.ndarray, ndraws: int | None = 199
 ) -> np.ndarray:
     """
     use permutations and recompute the test statistics of independence
@@ -239,7 +238,7 @@ def _pdcovs_bootstrap(
     return n * pdcov_stats_boot
 
 
-def pvalue_pdcov(pdcov_results: PdcovResults, ndraws: Optional[int] = 199) -> float:
+def pvalue_pdcov(pdcov_results: PdcovResults, ndraws: int | None = 199) -> float:
     """
     test of no dependence between `X` and `Y` given `Z`
 

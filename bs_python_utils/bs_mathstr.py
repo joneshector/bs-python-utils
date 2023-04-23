@@ -37,13 +37,13 @@ str_sigma = r"$\sigma$"
 str_sigma2 = r"$\sigma^2$"
 
 # Unicode
-uni_beta0 = f"\N{GREEK SMALL LETTER BETA}\N{SUBSCRIPT ZERO}"
-uni_beta1 = f"\N{GREEK SMALL LETTER BETA}\N{SUBSCRIPT ONE}"
-uni_pi = f"\N{GREEK SMALL LETTER PI}"
-uni_sigma = f"\N{GREEK SMALL LETTER SIGMA}"
-uni_sigma2 = f"\N{GREEK SMALL LETTER SIGMA}\N{SUPERSCRIPT TWO}"
-uni_s2 = f"s\N{SUPERSCRIPT TWO}"
-uni_R2 = f"R\N{SUPERSCRIPT TWO}"
+uni_beta0 = "\N{GREEK SMALL LETTER BETA}\N{SUBSCRIPT ZERO}"
+uni_beta1 = "\N{GREEK SMALL LETTER BETA}\N{SUBSCRIPT ONE}"
+uni_pi = "\N{GREEK SMALL LETTER PI}"
+uni_sigma = "\N{GREEK SMALL LETTER SIGMA}"
+uni_sigma2 = "\N{GREEK SMALL LETTER SIGMA}\N{SUPERSCRIPT TWO}"
+uni_s2 = "s\N{SUPERSCRIPT TWO}"
+uni_R2 = "R\N{SUPERSCRIPT TWO}"
 
 
 sub_sup_scripts = {

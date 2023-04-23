@@ -2,7 +2,6 @@
 Cntains various `scikit-learn` utility programs.
 """
 
-from typing import Optional
 
 import numpy as np
 from sklearn.linear_model import Lasso
@@ -10,7 +9,7 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
 
 def skl_npreg_lasso(
-    y: np.ndarray, X: np.ndarray, alpha: float, degree: Optional[int] = 4
+    y: np.ndarray, X: np.ndarray, alpha: float, degree: int | None = 4
 ) -> np.ndarray:
     """
     Lasso nonparametric regression of `y` over polynomials of `X`
@@ -59,7 +58,7 @@ def plot_lasso_path(y: np.ndarray, X: np.ndarray, eps: float = 1e-3) -> None:
     plt.figure(1)
     colors = cycle(["b", "r", "g", "c", "k"])
     neg_log_alphas_lasso = -np.log10(alphas_lasso)
-    for coef_l, c in zip(coefs_lasso, colors):
+    for coef_l, c in zip(coefs_lasso, colors, strict=True):
         plt.plot(neg_log_alphas_lasso, coef_l, c=c)
 
     plt.xlabel("-Log(alpha)")

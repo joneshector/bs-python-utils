@@ -1,6 +1,6 @@
 """ personal library of Seaborn plots
 """
-from typing import Callable, Tuple, Optional
+from typing import Callable
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -40,10 +40,10 @@ def bs_sns_bar_x_byf(
     xstr: str,
     fstr: str,
     statistic: Callable = np.mean,
-    label_x: Optional[str] = None,
-    label_f: Optional[str] = None,
-    title: Optional[str] = None,
-) -> Tuple[mpl.figure.Figure, mpl.figure.Axes]:
+    label_x: str | None = None,
+    label_f: str | None = None,
+    title: str | None = None,
+) -> tuple[mpl.figure.Figure, mpl.figure.Axes]:
     """make a bar plot of x by f and g
 
     Args:
@@ -87,11 +87,11 @@ def bs_sns_bar_x_byfg(
     fstr: str,
     gstr: str,
     statistic: Callable = np.mean,
-    label_x: Optional[str] = None,
-    label_f: Optional[str] = None,
-    label_g: Optional[str] = None,
-    title: Optional[str] = None,
-) -> Tuple[mpl.figure.Figure, mpl.figure.Axes]:
+    label_x: str | None = None,
+    label_f: str | None = None,
+    label_g: str | None = None,
+    title: str | None = None,
+) -> tuple[mpl.figure.Figure, mpl.figure.Axes]:
     """make a bar plot of x by f and g
 
     Args:
@@ -136,9 +136,9 @@ def bs_sns_bar_x_byfg(
 def bs_sns_density_estimates(
     df: pd.DataFrame,
     true_values: np.ndarray,
-    method_string: Optional[str] = "Estimator",
-    coeff_string: Optional[str] = "Parameter",
-    estimate_string: Optional[str] = "Estimate",
+    method_string: str | None = "Estimator",
+    coeff_string: str | None = "Parameter",
+    estimate_string: str | None = "Estimate",
     max_cols: int = 3,
 ) -> sns.FacetGrid:
     """
@@ -167,7 +167,7 @@ def bs_sns_density_estimates(
     )
     g.map(sns.kdeplot, estimate_string)
     g.set_titles("{col_name}")
-    for true_val, ax in zip(true_values, g.axes.ravel()):
+    for true_val, ax in zip(true_values, g.axes.ravel(), strict=True):
         ax.vlines(true_val, *ax.get_ylim(), color="k", linestyles="dashed")
     g.add_legend()
 
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     # change labels in legend
     l2 = bs_sns_get_legend(g2)
     labels2 = ["USA", "Japan", "Europe"]
-    for t, l in zip(l2.texts, labels2):
-        t.set_text(l)
+    for t, lab in zip(l2.texts, labels2, strict=True):
+        t.set_text(lab)
 
     plt.show()

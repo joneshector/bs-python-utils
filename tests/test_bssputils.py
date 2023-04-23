@@ -2,7 +2,7 @@ from math import exp, isclose, log, pi, sqrt
 
 import numpy as np
 
-from bs_python_utils.bsnputils import (
+from bs_python_utils.bssputils import (
     bs_sqrt_pdmatrix,
     bsgrid,
     ecdf,
@@ -155,7 +155,7 @@ def test_rice_stderr():
     x = np.arange(n) / n * sx
     rng = np.random.default_rng()
     y = x + rng.normal(size=n) * sy
-    s = rice_stderr(y, x, is_sorted=True)
+    s = rice_stderr(y, x, sorted=True)
     assert isclose(np.mean(s), sy, rel_tol=0.05)
     x2 = rng.uniform(size=n) * sx
     y2 = x2 + rng.normal(size=n) * sy

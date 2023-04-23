@@ -1,7 +1,7 @@
 """ interface to scipy.optimize """
-from math import sqrt
-from typing import Callable, Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass
+from math import sqrt
+from typing import Any, Callable, Optional, Union
 
 import numpy as np
 import scipy.linalg as spla
@@ -9,10 +9,11 @@ import scipy.optimize as spopt
 
 from bs_python_utils.bsnputils import npmaxabs
 from bs_python_utils.bssputils import describe_array
-from bs_python_utils.bsutils import bs_error_abort, print_stars, time_this
+from bs_python_utils.bsutils import bs_error_abort, print_stars
+from bs_python_utils.Timer import timeit
 
 ScalarFunctionAndGradient = Callable[
-    [np.ndarray, list, Optional[bool]], Union[float, Tuple[float, np.ndarray]]
+    [np.ndarray, list, Optional[bool]], Union[float, tuple[float, np.ndarray]]
 ]
 """Type of f(v, args, gr) that returns a scalar value and also a gradient if gr is True"""
 
@@ -24,14 +25,12 @@ class OptimizeParams:
     combines values, bounds and initial values for a parameter vector
     """
 
-    params_values: Union[np.ndarray, None]
-    params_bounds: Union[List[Tuple], None]
-    params_init: Union[np.ndarray, None]
+    params_values: np.ndarray | None
+    params_bounds: list[tuple] | None
+    params_init: np.ndarray | None
 
 
-def print_optimization_results(
-    resus: object, title: Optional[str] = "Minimizing"
-) -> None:
+def print_optimization_results(resus: object, title: str | None = "Minimizing") -> None:
     """
     print results from unconstrained optimization
 
@@ -57,9 +56,9 @@ def print_optimization_results(
 
 def print_constrained_optimization_results(
     resus: object,
-    title: Optional[str] = "Minimizing",
-    print_constr: Optional[bool] = False,
-    print_multipliers: Optional[bool] = False,
+    title: str | None = "Minimizing",
+    print_constr: bool | None = False,
+    print_multipliers: bool | None = False,
 ) -> None:
     """
     print results from constrained optimization
@@ -95,10 +94,10 @@ def armijo_alpha(
     x: np.ndarray,
     d: np.ndarray,
     args: list,
-    alpha_init: Optional[float] = 1.0,
-    beta: Optional[float] = 0.5,
-    max_iter: Optional[int] = 100,
-    tol: Optional[float] = 0.0,
+    alpha_init: float | None = 1.0,
+    beta: float | None = 0.5,
+    max_iter: int | None = 100,
+    tol: float | None = 0.0,
 ) -> float:
     """Given a function `f` we are minimizing, computes the step size `alpha`
     to take in the direction `d` using the Armijo rule
@@ -131,7 +130,7 @@ def armijo_alpha(
 
 def barzilai_borwein_alpha(
     grad_f: Callable, x: np.ndarray, args: list
-) -> Tuple[float, np.ndarray]:
+) -> tuple[float, np.ndarray]:
     """Given a function `f` we are minimizing, computes the step size `alpha`
     to take in the opposite direction of the gradient using the Barzilai-Borwein rule
 
@@ -157,9 +156,9 @@ def check_gradient_scalar_function(
     fg: ScalarFunctionAndGradient,
     p: np.ndarray,
     args: list,
-    mode: Optional[str] = "central",
-    EPS: Optional[float] = 1e-6,
-) -> Tuple[np.ndarray, np.ndarray]:
+    mode: str | None = "central",
+    EPS: float | None = 1e-6,
+) -> tuple[np.ndarray, np.ndarray]:
     """Checks the gradient of a scalar function
 
     Args:
@@ -199,19 +198,19 @@ def check_gradient_scalar_function(
     return f_grad, g
 
 
-@time_this
+@timeit
 def acc_grad_descent(
     grad_f: Callable,
     x_init: np.ndarray,
-    prox_h: Optional[Callable] = None,
-    other_params: Optional[Any] = None,
-    print_result: Optional[bool] = False,
-    verbose: Optional[bool] = False,
-    tol: Optional[float] = 1e-9,
-    alpha: Optional[float] = 1.01,
-    beta: Optional[float] = 0.5,
-    maxiter: Optional[int] = 10000,
-) -> Tuple[np.ndarray, bool]:
+    prox_h: Callable | None = None,
+    other_params: Any | None = None,
+    print_result: bool | None = False,
+    verbose: bool | None = False,
+    tol: float | None = 1e-9,
+    alpha: float | None = 1.01,
+    beta: float | None = 0.5,
+    maxiter: int | None = 10000,
+) -> tuple[np.ndarray, bool]:
     """
     minimizes `(f+h)` by Accelerated Gradient Descent
      where `f` is smooth and convex  and `h` is convex.
@@ -249,10 +248,10 @@ def acc_grad_descent(
     if verbose:
         print(f"agd: grad_err_init={grad_err_init}")
 
-    iter = 0
+    n_iter = 0
     theta = 1.0
 
-    while iter < maxiter:
+    while n_iter < maxiter:
         grad_err = npmaxabs(g)
         if grad_err < tol:
             break
@@ -276,10 +275,10 @@ def acc_grad_descent(
         t_hat = 0.5 * ndy * ndy / abs(np.dot(y - yi, gi - g))
         t = min(alpha * t, max(beta * t, t_hat))
 
-        iter += 1
+        n_iter += 1
 
         if verbose:
-            print(f" AGD with grad_err = {grad_err} after {iter} iterations")
+            print(f" AGD with grad_err = {grad_err} after {n_iter} iterations")
 
     x_conv = y
 
@@ -299,8 +298,8 @@ def acc_grad_descent(
 
 
 def _fix_some(
-    obj: Callable, grad_obj: Callable, fixed_vars: List[int], fixed_vals: np.ndarray
-) -> Tuple[Callable, Callable]:
+    obj: Callable, grad_obj: Callable, fixed_vars: list[int], fixed_vals: np.ndarray
+) -> tuple[Callable, Callable]:
     """
     Takes in a function and its gradient, fixes the variables
     whose indices are `fixed_vars` to the values in `fixed_vals`,
@@ -338,11 +337,11 @@ def minimize_some_fixed(
     obj: Callable,
     grad_obj: Callable,
     x_init: np.ndarray,
-    args: List,
-    fixed_vars: Union[List[int], None],
-    fixed_vals: Union[np.ndarray, None],
-    options: Optional[Dict] = None,
-    bounds: Optional[List[Tuple]] = None,
+    args: list,
+    fixed_vars: list[int] | None,
+    fixed_vals: np.ndarray | None,
+    options: dict | None = None,
+    bounds: list[tuple] | None = None,
 ):
     """
     minimize a function with some variables fixed, using L-BFGS-B

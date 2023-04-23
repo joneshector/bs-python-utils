@@ -1,7 +1,6 @@
 import linecache
 import sys
 import tracemalloc
-from typing import Optional
 
 import pandas as pd
 
@@ -28,7 +27,7 @@ def _obj_size_fmt(num: int) -> str:
         return "{:.2f}{}".format(num / (1.024 * 10**9), "GB")
 
 
-def memory_usage(n: Optional[int] = 10) -> None:
+def memory_usage(n: int | None = 10) -> None:
     """
     dataframe of the top `n` largest global items in memory
 
@@ -58,7 +57,7 @@ def memory_usage(n: Optional[int] = 10) -> None:
 
 
 def memory_display_top(
-    snapshot: tracemalloc.Snapshot, key_type: str = "lineno", limit: Optional[int] = 5
+    snapshot: tracemalloc.Snapshot, key_type: str = "lineno", limit: int | None = 5
 ) -> None:
     """
     prints out the lines with the top `limit` allocations of memory since tracemalloc.start()
@@ -94,7 +93,7 @@ def memory_display_top(
     other = top_stats[limit:]
     if other:
         size = sum(stat.size for stat in other)
-        print("%s other: %.1f KiB" % (len(other), size / 1024))
+        print(f"{len(other)} other: {size / 1024:.1f} KiB")
     total = sum(stat.size for stat in top_stats)
     print("Total allocated size: %.1f KiB" % (total / 1024))
 
@@ -144,20 +143,20 @@ def memory_display_top_diffs(
     other = top_stats[limit:]
     if other:
         size = sum(stat.size for stat in other)
-        print("%s other: %.1f KiB" % (len(other), size / 1024))
+        print(f"{len(other)} other: {size / 1024:.1f} KiB")
     total = sum(stat.size for stat in top_stats)
     print("Total allocated size: %.1f KiB" % (total / 1024))
 
 
 if __name__ == "__main__":
     tracemalloc.start()
-    l = list(range(10000))
+    list_ex = list(range(10000))
     import numpy as np
 
     v1 = np.ones(54546)
     snapshot1 = tracemalloc.take_snapshot()
     memory_display_top(snapshot1)
-    d = {i: li for (i, li) in enumerate(l)}
+    d = {i: li for (i, li) in enumerate(list_ex)}
     m = np.random.normal(size=(3498, 12))
     memory_usage(5)
     snapshot2 = tracemalloc.take_snapshot()

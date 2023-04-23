@@ -6,7 +6,10 @@ import traceback
 from functools import wraps
 from math import exp, factorial, log, sqrt
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, Tuple, Union, Optional
+from typing import Any, Callable, Iterable
+
+TwoFloats = tuple[float, float]
+ThreeFloats = tuple[float, float, float]
 
 
 def printargs(func: Callable) -> Callable:
@@ -56,7 +59,7 @@ def bs_error_abort(msg: str = "error, aborting") -> None:
     sys.exit(1)
 
 
-def bs_switch(match: str, dico: Dict, strict: bool = True, default="no match") -> Any:
+def bs_switch(match: str, dico: dict, strict: bool = True, default="no match") -> Any:
     """
     a switch statement that allows for partial matches if strict is False
 
@@ -88,11 +91,11 @@ def bs_switch(match: str, dico: Dict, strict: bool = True, default="no match") -
 
     """
     if strict:
-        for key in dico.keys():
+        for key in dico:
             if match == key:
                 return dico.get(key)
     else:
-        for key in dico.keys():
+        for key in dico:
             if match in key:
                 return dico.get(key)
     return default
@@ -128,7 +131,7 @@ def find_first(iterable: Iterable, condition: Callable = lambda x: True) -> Any:
     return next((i, x) for i, x in enumerate(iterable) if condition(x))
 
 
-def print_stars(title: str = None, n: Optional[int] = 70) -> None:
+def print_stars(title: str = None, n: int | None = 70) -> None:
     """
     prints a title within stars
 
@@ -172,7 +175,7 @@ def file_print_stars(file_handle, title: str = None, n: int = 70) -> None:
     file_handle.write("\n")
 
 
-def mkdir_if_needed(p: Union[Path, str]) -> Path:
+def mkdir_if_needed(p: Path | str) -> Path:
     """
     create the directory if it does not exist
 
@@ -185,7 +188,7 @@ def mkdir_if_needed(p: Union[Path, str]) -> Path:
     """
     try:
         q = Path(p)
-    except:
+    except OSError:
         bs_error_abort(f"{p} is not a path")
     if not q.exists():
         q.mkdir(parents=True)
@@ -213,8 +216,8 @@ def bscomb(n: int, k: int) -> int:
 
 
 def bslog(
-    x: float, eps: Optional[float] = 1e-30, deriv: Optional[int] = 0
-) -> float | Tuple[float, float] | Tuple[float, float, float]:
+    x: float, eps: float | None = 1e-30, deriv: int | None = 0
+) -> float | TwoFloats | ThreeFloats:
     """
     extends the logarithm below `eps` by taking a second-order approximation
     perhaps with derivatives
@@ -253,8 +256,8 @@ def bslog(
 
 
 def bsxlogx(
-    x: float, eps: Optional[float] = 1e-30, deriv: Optional[int] = 0
-) -> float | Tuple[float, float] | Tuple[float, float, float]:
+    x: float, eps: float | None = 1e-30, deriv: int | None = 0
+) -> float | TwoFloats | ThreeFloats:
     """
     extends `x \\ln(x)` below `eps` by making it go to zero in a `C^2` extension
     perhaps with derivatives
@@ -289,12 +292,26 @@ def bsxlogx(
             return log_smaller, logeps + dx, 1.0 / eps
 
 
+def _bsexp_extend(x: float, deriv: int, limx: float) -> float | TwoFloats | ThreeFloats:
+    """extends the exponential C^2-wise beyond limx"""
+    elimx = exp(limx)
+    dx = x - limx
+    exp_extend = elimx * (1.0 + dx * (1.0 + 0.5 * dx))
+    if deriv == 0:
+        return exp_extend
+    dexp_extend = elimx * (1.0 + dx)
+    if deriv == 1:
+        return exp_extend, dexp_extend
+    if deriv == 2:
+        return exp_extend, dexp_extend, elimx
+
+
 def bsexp(
     x: float,
-    bigx: Optional[float] = 50.0,
-    lowx: Optional[float] = -50.0,
-    deriv: Optional[int] = 0,
-) -> float | Tuple[float, float] | Tuple[float, float, float]:
+    bigx: float | None = 50.0,
+    lowx: float | None = -50.0,
+    deriv: int | None = 0,
+) -> float | TwoFloats | ThreeFloats:
     """
     `C^2`-extends the exponential above `bigx` and below `lowx`
     perhaps with derivatives
@@ -320,32 +337,14 @@ def bsexp(
         if deriv == 2:
             return expx, expx, expx
     elif x < lowx:
-        elowx = exp(lowx)
-        dx = lowx - x
-        exp_smaller = elowx * (1.0 - dx * (1.0 - 0.5 * dx))
-        if deriv == 0:
-            return exp_smaller
-        dexp_smaller = elowx * (1.0 - dx)
-        if deriv == 1:
-            return exp_smaller, dexp_smaller
-        if deriv == 2:
-            return exp_smaller, dexp_smaller, elowx
+        return _bsexp_extend(x, deriv, lowx)
     else:
-        ebigx = exp(bigx)
-        dx = x - bigx
-        exp_larger = ebigx * (1.0 + dx * (1.0 + 0.5 * dx))
-        if deriv == 0:
-            return exp_larger
-        dexp_larger = ebigx * (1.0 + dx)
-        if deriv == 1:
-            return exp_larger, dexp_larger
-        if deriv == 2:
-            return exp_larger, dexp_larger, ebigx
+        return _bsexp_extend(x, deriv, bigx)
 
 
 def bs_projection_point(
     x: float, y: float, a: float, b: float, c: float
-) -> Tuple[float, float, float]:
+) -> tuple[float, float, float]:
     """
     projection of point (x,y) on line ax+by+c=0
 

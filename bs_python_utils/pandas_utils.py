@@ -1,7 +1,6 @@
 """Utility functions for pandas """
 
 from itertools import product
-from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -12,10 +11,10 @@ from bs_python_utils.bsutils import print_stars
 
 def bspd_print(
     df: pd.DataFrame,
-    s: Optional[str] = "",
-    max_rows: Optional[int] = None,
-    max_cols: Optional[int] = None,
-    precision: Optional[int] = None,
+    s: str | None = "",
+    max_rows: int | None = None,
+    max_cols: int | None = None,
+    precision: int | None = None,
 ) -> None:
     """Pretty-prints a data frame
 
@@ -43,8 +42,8 @@ def bspd_print(
 def bspd_cross_products(
     df: pd.DataFrame,
     l1: list[str],
-    l2: Optional[list[str]] = None,
-    with_squares: Optional[bool] = True,
+    l2: list[str] | None = None,
+    with_squares: bool | None = True,
 ) -> pd.DataFrame:
     """Returns a DataFrame with cross-products of the variables of `df`
     whose names are in `l1` and `l2`.
@@ -63,7 +62,7 @@ def bspd_cross_products(
     l12 = list(product(l1, lp2))
     cross_pairs = [[x[0], x[1]] for x in l12 if x[0] != x[1]]
     unique_pairs = []
-    for i, c in enumerate(cross_pairs):
+    for _i, c in enumerate(cross_pairs):
         print(c)
         c_ordered = c if c[0] < c[1] else list(reversed(c))
         print(c_ordered)
@@ -86,7 +85,7 @@ def bspd_cross_products(
     return df_cprods
 
 
-def _list_str(names: Union[str, List[str]], suffix: str = None) -> List[str]:
+def _list_str(names: str | list[str], suffix: str = None) -> list[str]:
     """make a list of strings with possibly the added suffix
 
     Args:
@@ -110,9 +109,16 @@ def _list_str(names: Union[str, List[str]], suffix: str = None) -> List[str]:
         bs_error_abort("names should be a string or a list of strings.")
 
 
+def _check_colnames(col_names: str | list[str] | list[str | list[str]], n_T: int):
+    if not isinstance(col_names, list):
+        bs_error_abort("If T is a list, then col_names should be a list too.")
+    elif len(col_names) != n_T:
+        bs_error_abort(f"T has {n_T} elements but col_names has {len(col_names)}.")
+
+
 def bspd_statsdf(
-    T: Union[np.ndarray, List[np.ndarray]],
-    col_names: Union[Union[str, List[str]], List[Union[str, List[str]]]],
+    T: np.ndarray | list[np.ndarray],
+    col_names: str | list[str] | list[str | list[str]],
 ) -> pd.DataFrame:
     """
     make a dataframe with columns from the array(s) in T and names from col_names
@@ -127,16 +133,11 @@ def bspd_statsdf(
     """
     if isinstance(T, list):
         n_T = len(T)
-        if not isinstance(col_names, list):
-            bs_error_abort("If T is a list, then col_names should be a list too.")
-        elif len(col_names) != n_T:
-            bs_error_abort(f"T has {n_T} elements but col_names has {len(col_names)}.")
-        # ndims_T = np.ndarray(n_T, dtype=int)
+        _check_colnames(col_names, n_T)
         shape_T = []
         for i in range(n_T):
-            # ndims_T[i] = test_vector_or_matrix(T[i])
             shape_T.append(T[i].shape)
-        set_nrows = set([shape_i[0] for shape_i in shape_T])
+        set_nrows = {shape_i[0] for shape_i in shape_T}
         if len(set_nrows) > 1:
             bs_error_abort("All T arrays should have the same number of rows.")
         big_T = T[0]
@@ -163,7 +164,7 @@ def bspd_statsdf(
     return df
 
 
-def _test_names_n(col_names: List[str]) -> List[int]:
+def _test_names_n(col_names: list[str]) -> list[int]:
     """
     Tests that if a name in col_names ends with `_n`, with `n` an integer, then all names do
 
