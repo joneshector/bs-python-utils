@@ -33,9 +33,9 @@ clean-build: ## clean build artifacts
 .PHONY: publish
 publish: ## publish a release to pypi.
 	@echo "🚀 Publishing: Dry run."
-	@poetry publish --dry-run -u bsalanie -p $PYPI_PASSWD
+	@poetry publish --dry-run -u bsalanie -p ${PYPI_PASSWD}
 	@echo "🚀 Publishing."
-	@poetry publish -u bsalanie -p $PYPI_PASSWD
+	@poetry publish -u bsalanie -p ${PYPI_PASSWD}
 
 .PHONY: build-and-publish
 build-and-publish: build publish ## Build and publish.
@@ -47,6 +47,10 @@ docs-test: ## Test if documentation can be built without warnings or errors
 .PHONY: docs
 docs: ## Build and serve the documentation
 	@poetry run mkdocs serve
+
+.PHONY: docs-deploy
+docs-deploy: ## Build and deploy the documentation on Github pages
+	@poetry run mkdocs gh-deploy
 
 .PHONY: help
 help:

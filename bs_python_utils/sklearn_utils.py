@@ -2,10 +2,12 @@
 Cntains various `scikit-learn` utility programs.
 """
 
+from itertools import cycle
 from typing import cast
 
+import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.linear_model import Lasso
+from sklearn.linear_model import Lasso, lasso_path
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
 
@@ -70,37 +72,3 @@ def plot_lasso_path(y: np.ndarray, X: np.ndarray, eps: float = 1e-3) -> None:
     plt.show()
 
     return
-
-
-if __name__ == "__main__":
-    n_obs = 10000
-    X1 = -2.0 + 3.0 * np.random.uniform(size=n_obs)
-    X2 = np.random.normal(loc=1.0, scale=2.0, size=n_obs)
-    y = X1 * X2 * X2 / 100.0 - (X1 / 5.0 - X2 / 3.0) ** 3 + np.random.normal(size=n_obs)
-
-    X = np.column_stack((X1, X2))
-
-    from itertools import cycle
-
-    import matplotlib.pyplot as plt
-    import numpy as np
-    from sklearn.linear_model import lasso_path
-
-    plt.style.use("seaborn")
-
-    degree = 10
-    stdsc = StandardScaler()
-    sfit = stdsc.fit(X)
-    X_scaled = sfit.transform(X)
-    pf = PolynomialFeatures(degree)
-    # Create the features and fit
-    X_poly = pf.fit_transform(X_scaled)
-
-    y_pred = skl_npreg_lasso(y, X, alpha=0.001)
-
-    plt.clf()
-
-    ax = plt.axes()
-    ax.scatter(y, y_pred)
-    ax.plot(y, y, "-r")
-    plt.show()

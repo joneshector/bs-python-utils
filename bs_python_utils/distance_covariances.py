@@ -9,7 +9,7 @@ from typing import cast
 
 import numpy as np
 
-from bs_python_utils.bsnputils import test_square, test_vector_or_matrix
+from bs_python_utils.bsnputils import check_square, check_vector_or_matrix
 from bs_python_utils.bsutils import bs_error_abort
 
 
@@ -44,7 +44,7 @@ def _compute_distances(T: np.ndarray) -> np.ndarray:
     Returns:
         the matrix of norms of differences
     """
-    ndims_T = test_vector_or_matrix(T, "_compute_distances")
+    ndims_T = check_vector_or_matrix(T, "_compute_distances")
     if ndims_T == 1:
         return cast(np.ndarray, np.abs(np.subtract.outer(T, T)))
     else:
@@ -68,7 +68,7 @@ def _double_decenter(A: np.ndarray, unbiased: bool = False) -> np.ndarray:
     Returns:
         the doubly decentered matrix
     """
-    n = test_square(A, "_double_decenter")
+    n = check_square(A, "_double_decenter")
     A_1 = np.sum(A, 0)
     A_2 = np.sum(A, 1).reshape((-1, 1))
     A_0 = np.sum(A_1)
@@ -81,8 +81,8 @@ def _double_decenter(A: np.ndarray, unbiased: bool = False) -> np.ndarray:
 
 
 def _dcov_prod(A: np.ndarray, B: np.ndarray, unbiased: bool = False) -> float:
-    n = test_square(A, "_dcov_prod")
-    m = test_square(B, "_dcov_prod")
+    n = check_square(A, "_dcov_prod")
+    m = check_square(B, "_dcov_prod")
     if m == n:
         fac3 = (n - 3) if unbiased else n
         return cast(float, np.sum(A * B) / (n * fac3))
@@ -180,7 +180,6 @@ def pdcov_pdcor(X: np.ndarray, Y: np.ndarray, Z: np.ndarray) -> PdcovResults:
         X: `n` observations of a random variable or vector
         Y: `n` observations of a random variable or vector
         Z: `n` observations of a random variable or vector
-        unbiased: if `True`, we use the Szekely and Rizzo 2014 formula
 
     Returns:
         a `PdcovResults` instance
@@ -257,35 +256,3 @@ def pvalue_pdcov(pdcov_results: PdcovResults, ndraws: int = 199) -> float:
     pdcov_stats_boot = _pdcovs_bootstrap(X_dd, Y_dd, Z_dd, ndraws)
     sum_small = cast(int, np.sum(pdcov_stat < pdcov_stats_boot))
     return (1.0 + sum_small) / (1.0 + ndraws)
-
-
-if __name__ == "__main__":
-    ## test partial distance covariance
-    # example page 2396 of Szekely and Rizzo 2014
-    n = 2000
-    do_bootstrap = False
-    Z1 = np.random.normal(size=n)
-    Z2 = np.random.normal(size=n)
-    Z3 = np.random.normal(size=n)
-    X = Z1 + Z3
-    Y = Z2 + Z3
-    Z = Z3
-    print("\n\n     Test of page 2396")
-    dcov_XY = dcov_dcor(X, Y)
-    dcov_XZ = dcov_dcor(X, Z)
-    dcov_YZ = dcov_dcor(Y, Z)
-    pdcov_XYZ = pdcov_pdcor(X, Y, Z)
-    print(f"         dCor(X, Y)={dcov_XY.dcor}, should be 0.2062 in large samples")
-    print(f"         dCor(X, Z)={dcov_XZ.dcor}, should be 0.4319 in large samples")
-    print(f"         dCor(Y, Z)={dcov_YZ.dcor}, should be 0.4319 in large samples")
-    print(
-        f"         pdCor(X, Y; Z)={pdcov_XYZ.pdcor}, should be 0.0242 in large samples"
-    )
-
-    if do_bootstrap:
-        ndraws = 499
-        pval = pvalue_pdcov(pdcov_XYZ)
-        print(
-            f"\n\n test stat={pdcov_XYZ.pdcov_stat: >.2f} has p-value {pval} for"
-            f" {ndraws} draws"
-        )

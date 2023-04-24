@@ -1,7 +1,4 @@
-""" Utiligies for logging
-
-
-The `logger_function` decorator
+""" Utilities for logging
 """
 import functools
 import logging
@@ -24,32 +21,32 @@ def init_logger(
         log_level_for_file:
         save_dir:
 
-    Returns: the logger
+    Returns:
+        the logger
 
-    logger_dir = "logs"
-    logger_name = "test_log"
-    logger = init_logger(logger_name, save_dir=logger_dir)
-    logger = get_logger(logger_name)
+    Example:
+        logger_dir = "logs"
+        logger_name = "check_log"
+        logger = init_logger(logger_name, save_dir=logger_dir)
+        logger = get_logger(logger_name)
 
-    will create two logs:
+        will create two logs:
 
-    * one  printed to console where we run the code (the `StreamHandler`),
-    * and one that will be saved to file `save_dir/logger_name.txt` (the `FileHandler`).
+        * one  printed to console where we run the code (the `StreamHandler`),
+        * and one that will be saved to file `save_dir/logger_name.txt` (the `FileHandler`).
 
-    `'logger.propagate = False'`  makes sure that the logs sent to file will not be printed to console.
+        `'logger.propagate = False'`  makes sure that the logs sent to file will not be printed to console.
 
-    We use the `Formatter` class to define the format of the logs.
-    Here:
-    * The time of the log in a human-readable format, `asctime`
-    * `levelname` is the level of the log, one out of `INFO, DEBUG, WARNING, ERROR, CRITICAL`.
-    * The name of the file, `filename`, from which the log was generated,
-    and the line number, `lineno`.
-    *  Lastly,  the message itself — `message`.
+        We use the `Formatter` class to define the format of the logs.
+        Here:
+        * The time of the log in a human-readable format, `asctime`
+        * `levelname` is the level of the log, one out of `INFO, DEBUG, WARNING, ERROR, CRITICAL`.
+        * The name of the file, `filename`, from which the log was generated,
+        and the line number, `lineno`.
+        *  Lastly,  the message itself — `message`.
 
-    The default has only `INFO` logs and above (i.e., also `WARNING, ERROR` and `CRITICAL`)
-    displayed in the console; the file will also include `DEBUG` logs.
-
-
+        The default has only `INFO` logs and above (i.e., also `WARNING, ERROR` and `CRITICAL`)
+        displayed in the console; the file will also include `DEBUG` logs.
     """
     logger = logging.getLogger()
     logger.setLevel(level=logging.DEBUG)
@@ -77,7 +74,6 @@ def init_logger(
 
 def log_execution(func: Callable) -> Callable:
     """Decorator to log the execution of a function
-
     Only records entry to and exit from the function, to the console
     """
     loglevel = logging.info
@@ -98,6 +94,7 @@ def get_logger(logger_name: str) -> logging.Logger:
     Args:
         logger_name: name you want for the logger
 
-    Returns: the logger
+    Returns:
+        the logger
     """
     return logging.getLogger(logger_name)

@@ -4,6 +4,7 @@ Contains various utilities programs.
 import sys
 import traceback
 from functools import wraps
+from io import TextIOBase
 from math import exp, factorial, log, sqrt
 from pathlib import Path
 from typing import Any, Callable, Iterable, cast
@@ -59,7 +60,9 @@ def bs_error_abort(msg: str = "error, aborting") -> None:
     sys.exit(1)
 
 
-def bs_switch(match: str, dico: dict, strict: bool = True, default="no match") -> Any:
+def bs_switch(
+    match: str, dico: dict, strict: bool = True, default: Any = "no match"
+) -> Any:
     """
     a switch statement that allows for partial matches if strict is False
 
@@ -151,7 +154,7 @@ def print_stars(title: str = None, n: int = 70) -> None:
     print()
 
 
-def file_print_stars(file_handle, title: str = None, n: int = 70) -> None:
+def file_print_stars(file_handle: TextIOBase, title: str = None, n: int = 70) -> None:
     """
     prints to a file a title within stars
 
@@ -344,11 +347,11 @@ def bs_projection_point(
     projection of point (x,y) on line ax+by+c=0
 
     Args:
-        x, y: coordinates
-        a, b, c: line parameters
+        x: y: coordinates
+        a: b: c: line parameters (as in ax+by+c=0)
 
     Returns:
-        x_proj, y_proj: coordinates of projection point
+        x_proj: y_proj: coordinates of projection point
         dist: distance of point from line
     """
     a2b2 = a * a + b * b

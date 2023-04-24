@@ -13,10 +13,10 @@ from statsmodels.nonparametric._kernel_base import EstimatorSettings
 from statsmodels.nonparametric.kernel_regression import KernelReg
 
 from bs_python_utils.bsnputils import (
+    check_matrix,
+    check_vector,
+    check_vector_or_matrix,
     make_lexico_grid,
-    test_matrix,
-    test_vector,
-    test_vector_or_matrix,
 )
 from bs_python_utils.bssputils import spline_reg
 from bs_python_utils.bsutils import bs_error_abort
@@ -52,7 +52,7 @@ def _powers_Z(Z: np.ndarray, degrees: np.ndarray) -> np.ndarray:
     if Z.ndim != 2:
         bs_error_abort(f"Z should have dimension 2, not {Z.ndim}")
     m = Z.shape[1]
-    mdegs = test_vector(degrees)
+    mdegs = check_vector(degrees)
     if mdegs != m:
         bs_error_abort("The size of degrees should equal the number of columns of Z")
     res = np.ones(Z.shape[0])
@@ -111,7 +111,7 @@ def proj_Z(
     Args:
         W: variable(s) `(nobs)` or `(nobs, nw)`
         Z: instruments `(nobs) or `(nobs, nz)`;
-             they should **not** include a constant term
+            they should **not** include a constant term
         p: maximum total degree for interactions of the columns of `Z`
         verbose: prints stuff if True
 
@@ -181,21 +181,21 @@ def reg_nonpar(
 
     Args:
         y: a vector of size nobs
-        np.ndarray X: a (nobs) vector or a matrix of shape (nobs, m)
-        var_types: specify types of all `X` variables if not all of them are continuous; \
-     one character per variable
-        * 'c' for continuous
-        * 'u' discrete unordered
-        * 'o' discrete ordered
+        X: a (nobs) vector or a matrix of shape (nobs, m)
+        var_types: specify types of all `X` variables if not all of them are continuous;
+            one character per variable
+            * 'c' for continuous
+            * 'u' discrete unordered
+            * 'o' discrete ordered
         n_sub: size of subsample for cross-validation;  by default it is `200^{(m+4)/5}`
         n_res: how many subsamples we draw; 1 by default
 
-    Returns: 
-        fitted on sample (nobs, with derivatives)  
+    Returns:
+        fitted on sample (nobs, with derivatives)
         and bandwidths (m)
     """
-    _ = test_vector_or_matrix(X)
-    n_obs = test_vector(y)
+    _ = check_vector_or_matrix(X)
+    n_obs = check_vector(y)
     if X.shape[0] != n_obs:
         bs_error_abort("X and y should have the same number of observations")
     m = 1 if X.ndim == 1 else X.shape[1]
@@ -234,7 +234,7 @@ def reg_nonpar_fit(
     Args:
         y: a vector of size nobs
         X: a (nobs) vector or a matrix of shape (nobs, m)
-        var_types: specify types of all `X` variables if not all of them are continuous; \
+        var_types: specify types of all `X` variables if not all of them are continuous;
             one character per variable
             * 'c' for continuous
             * 'u' discrete unordered
@@ -243,7 +243,7 @@ def reg_nonpar_fit(
         n_res: how many subsamples we draw; 1 by default
         verbose: prints stuff if True
 
-    Returns: 
+    Returns:
         fitted values on sample (nobs)
     """
     kfbw = reg_nonpar(y, X, var_types, n_sub, n_res)
@@ -259,7 +259,7 @@ def flexible_reg(
     n_sub: int | None = None,
     n_res: int = 1,
     verbose: bool = False,
-):
+) -> np.ndarray:
     """
     flexible regression  of `Y` on `X`
 
@@ -267,15 +267,15 @@ def flexible_reg(
         Y: independent variable `(nobs)` or `(nobs, ny)`
         X: covariates `(nobs)` or `(nobs, nx)`; should **not** include a constant term
         mode: what flexible means
-        * 'NP': non parametric
-        * 'SPL': spline regression, only on one covariate
-        * '1': linear
-        * '2': quadratic
-        var_types: [for 'NP' only]  specify types of all `X` variables if not all of them are continuous; \
+            * 'NP': non parametric
+            * 'SPL': spline regression, only on one covariate
+            * '1': linear
+            * '2': quadratic
+        var_types: [for 'NP' only]  specify types of all `X` variables if not all of them are continuous; 
             one character per variable
-        * 'c' for continuous
-        * 'u' discrete unordered
-        * 'o' discrete ordered
+            * 'c' for continuous
+            * 'u' discrete unordered
+            * 'o' discrete ordered
         n_sub: [for 'NP' only] size of subsample for cross-validation; \
             by default it is `200^{(m+4)/5}`
         n_res: [for 'NP' only] how many subsamples we draw; 1 if `None`
@@ -329,7 +329,7 @@ def bs_multivariate_normal_pdf(
     Returns:
         the values of the density at `values_x`
     """
-    ndims_values = test_vector_or_matrix(values_x, "bs_multivariate_normal_pdf")
+    ndims_values = check_vector_or_matrix(values_x, "bs_multivariate_normal_pdf")
     if ndims_values == 1:  # we are evaluating a univariate normal
         # if not type(means_x) == float:
         #     bs_error_abort(f"means_x should be a float as values_x is a vector")
@@ -341,10 +341,10 @@ def bs_multivariate_normal_pdf(
         return cast(np.ndarray, dval)
     else:  # we are evaluating a multivariate normal
         n, nvars = values_x.shape
-        n_means = test_vector(means_x, "bs_multivariate_normal_pdf")
+        n_means = check_vector(means_x, "bs_multivariate_normal_pdf")
         if n_means != nvars:
             bs_error_abort(f"means_x should be a vector of size {nvars} not {n_means}")
-        nrows, ncols = test_matrix(cov_mat, "bs_multivariate_normal_pdf")
+        nrows, ncols = check_matrix(cov_mat, "bs_multivariate_normal_pdf")
         if nrows != ncols or nrows != nvars:
             bs_error_abort(
                 f"cov_mat should be a matrix ({nvars}, {nvars}) not ({nrows}, {ncols})"
@@ -378,8 +378,8 @@ def estimate_pdf(
     Returns:
         the density estimates at `values_x`
     """
-    ndims_x = test_vector_or_matrix(x_obs, "estimate_pdf")
-    ndims_valx = test_vector_or_matrix(x_points, "estimate_pdf")
+    ndims_x = check_vector_or_matrix(x_obs, "estimate_pdf")
+    ndims_valx = check_vector_or_matrix(x_points, "estimate_pdf")
 
     if ndims_x == 1:
         n_obs = x_obs.size
@@ -400,7 +400,7 @@ def estimate_pdf(
         xt_points = x_points
 
     if weights is not None:
-        n_w = test_vector(weights, "estimate_pdf")
+        n_w = check_vector(weights, "estimate_pdf")
         if n_w != n_obs:
             bs_error_abort(
                 f"if weights is given, it should be a vector of size {n_obs} not {n_w}"
@@ -444,7 +444,7 @@ def estimate_densities_at_quantiles(
      and the `{nq}^{nx}` vector of the joint density on the lexicographic grid of quantiles;
         if `X` is a vector, the `nq`-vector of the density at the quantiles, twice
     """
-    ndims_X = test_vector_or_matrix(X, "estimate_densities_")
+    ndims_X = check_vector_or_matrix(X, "estimate_densities_")
     if ndims_X == 1:
         f_X = estimate_pdf(X, np.quantile(X, qtiles))
         return f_X, f_X

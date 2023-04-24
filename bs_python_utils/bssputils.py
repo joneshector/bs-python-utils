@@ -2,17 +2,17 @@
 Contains various `scipy` utility programs.
 """
 from math import sqrt
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 import scipy.stats as sts
 from scipy.interpolate import UnivariateSpline
 
-from bs_python_utils.bsnputils import rice_stderr, test_vector
+from bs_python_utils.bsnputils import check_vector, rice_stderr
 from bs_python_utils.bsutils import bs_error_abort, print_stars
 
 
-def describe_array(v: np.ndarray, name: str | None = "v"):
+def describe_array(v: np.ndarray, name: str | None = "v") -> Any:
     """
     descriptive statistics on an array interpreted as a vector
 
@@ -49,13 +49,12 @@ def spline_reg(
         x_new: where we evaluate (at the points in `x` by default)
         is_sorted: True if `x` is sorted in increasing order
         smooth: True if we want a smoother; otherwise we go through all points provided
-        verbose: prints stuff if True
 
     Returns:
         values interpolated at `x_new`
     """
-    n = test_vector(x)
-    ny = test_vector(y)
+    n = check_vector(x)
+    ny = check_vector(y)
     if ny != n:
         bs_error_abort("x and y should have the same size")
 

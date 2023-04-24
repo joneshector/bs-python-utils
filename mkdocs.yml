@@ -5,11 +5,31 @@ site_description: my Python utilities
 site_author: Bernard Salanie
 edit_uri: edit/main/docs/
 repo_name: bsalanie/bs-python-utils
-copyright: Maintained by <a href="https://bsalanie.com">Florian</a>.
+copyright: Maintained by <a href="https://bsalanie.com">Bernard Salanie</a>.
 
 nav:
   - Home: index.md
-  - Modules: modules.md
+  - Modules: 
+    - General utilities:
+      - bsutils.md
+      - bs_logging.md
+      - bs_mathstr.md
+      - Timer.md
+      - bs_mem.md
+    - Scientific:
+      - bsnputils.md
+      - bssputils.md
+      - pandas_utils.md
+      - bsstats.md
+      - sklearn_utils.md
+      - distance_covariances.md
+      - bs_opt.md
+      - bs_sparse_gaussian.md
+    - Plotting:
+      - bs_plots.md
+      - bsmplutils.md
+      - bs_seaborn.md
+      - bs_altair.md
 plugins:
   - search
   - mkdocstrings:

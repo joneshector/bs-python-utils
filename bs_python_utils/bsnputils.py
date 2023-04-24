@@ -155,8 +155,8 @@ def rice_stderr(
     Returns:
         an array of the same size with the stderr(y | x)
     """
-    n = test_vector(x)
-    ny = test_vector(y)
+    n = check_vector(x)
+    ny = check_vector(y)
     if ny != n:
         bs_error_abort("x and y should have the same size")
 
@@ -409,7 +409,7 @@ def nppad_beg_zeros(v: np.ndarray, n: int) -> np.ndarray:
     Returns:
         padded array if `nv` < `n`, otherwise `v`
     """
-    nv = test_vector(v)
+    nv = check_vector(v)
     if nv < n:
         return np.pad(v, (n - nv, 0))
     else:
@@ -427,7 +427,7 @@ def nppad_end_zeros(v: np.ndarray, n: int) -> np.ndarray:
     Returns:
         padded array if `nv` < `n`, else `v`
     """
-    nv = test_vector(v)
+    nv = check_vector(v)
     if nv < n:
         return np.pad(v, (0, n - nv))
     else:
@@ -446,7 +446,7 @@ def nppad2_end_zeros(mat: np.ndarray, m: int, n: int) -> np.ndarray:
     Returns:
         padded array, where needed
     """
-    nrows, ncols = test_matrix(mat)
+    nrows, ncols = check_matrix(mat)
     max_rows = max(m, nrows)
     max_cols = max(n, ncols)
     if nrows < max_rows and ncols < max_cols:  # pad both dimensions
@@ -473,10 +473,11 @@ def bsgrid(v: np.ndarray, w: np.ndarray) -> np.ndarray:
         v: basis vector, size m
         w: basis vector, size n
 
-    Returns: an array of shape `(m n, 2)`
+    Returns:
+        an array of shape `(m n, 2)`
     """
-    m = test_vector(v)
-    n = test_vector(w)
+    m = check_vector(v)
+    n = check_vector(w)
     m, n = v.size, w.size
     v1 = np.repeat(v, n)
     v2 = np.tile(w, m)
@@ -495,7 +496,7 @@ def bsgrid(v: np.ndarray, w: np.ndarray) -> np.ndarray:
     """
 
 
-def test_vector(v: Any, fun_name: str = None) -> int:
+def check_vector(v: Any, fun_name: str = None) -> int:
     """
     test that `v` is a vector; aborts otherwise
 
@@ -516,7 +517,7 @@ def test_vector(v: Any, fun_name: str = None) -> int:
     return cast(int, v.size)
 
 
-def test_matrix(x: Any, fun_name: str = None) -> tuple[int, int]:
+def check_matrix(x: Any, fun_name: str = None) -> tuple[int, int]:
     """
     test that `x` is a matrix; aborts otherwise
 
@@ -537,7 +538,7 @@ def test_matrix(x: Any, fun_name: str = None) -> tuple[int, int]:
     return cast(tuple[int, int], x.shape)
 
 
-def test_vector_or_matrix(x: Any, fun_name: str = None) -> int:
+def check_vector_or_matrix(x: Any, fun_name: str = None) -> int:
     """
     test that `x` is a vector or a matrix; aborts otherwise
 
@@ -568,7 +569,7 @@ def bs_sqrt_pdmatrix(m: np.ndarray) -> np.ndarray:
     Returns:
         the square root of the matrix
     """
-    _ = test_square(m, "bs_sqrt_pdmatrix")
+    _ = check_square(m, "bs_sqrt_pdmatrix")
     eigval, eigvec = np.linalg.eigh(m)
     eigval = np.maximum(eigval, 0.0)
     eigval_sqrt = np.sqrt(eigval)
@@ -577,7 +578,7 @@ def bs_sqrt_pdmatrix(m: np.ndarray) -> np.ndarray:
     return cast(np.ndarray, res)
 
 
-def test_square(A: Any, fun_name: str | None) -> int:
+def check_square(A: Any, fun_name: str | None) -> int:
     """
     test that an object used in `fun_name` is a square matrix
 
@@ -601,7 +602,7 @@ def test_square(A: Any, fun_name: str | None) -> int:
     return cast(int, n)
 
 
-def test_tensor(x: Any, n_dims: int, fun_name: str | None) -> tuple[int, ...]:
+def check_tensor(x: Any, n_dims: int, fun_name: str | None) -> tuple[int, ...]:
     """
     test that `x` is an `n_dims` dimensional array; aborts otherwise
 
@@ -632,9 +633,9 @@ def make_lexico_grid(arr: np.ndarray) -> np.ndarray:
 
     Returns:
         `arr` if it is a vector; otherwise a matrix `({nr}^{nc}, {nc})`
-         for `nc=2`  it is like `bsgrid`
+            for `nc=2`  it is like `bsgrid`
     """
-    ndims_arr = test_vector_or_matrix(arr, "make_lexico_grid`")
+    ndims_arr = check_vector_or_matrix(arr, "make_lexico_grid`")
     if ndims_arr == 1:
         return arr
     else:

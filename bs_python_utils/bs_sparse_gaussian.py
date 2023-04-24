@@ -5,21 +5,24 @@ from pathlib import Path
 
 import numpy as np
 
+from bs_python_utils.bsnputils import TwoArrays
 from bs_python_utils.bsutils import bs_error_abort
 
 
-def setup_sparse_gaussian(ndims: int, iprec: int, GHsparsedir: str | None = None):
+def setup_sparse_gaussian(
+    ndims: int, iprec: int, GHsparsedir: str | None = None
+) -> TwoArrays:
     """
     get nodes and weights for sparse integration Ef(X) with X = N(0,1) in `ndims` dimensions
 
     usage: nodes, weights = setup_sparse_gaussian(mdims, iprec); intf = f(nodes) @ weights
 
-    Ars:
+    Args:
         ndims: number of dimensions (1 to 5)
         iprec: precision (must be 9, 13, or 17)
 
-    Returns: 
-        a pair of  arrays `nodes` and `weights`; \
+    Returns:
+        a pair of  arrays `nodes` and `weights`;
         `nodes` has `ndims`-1 columns and weights is a vector
     """
     GHdir = (
@@ -39,19 +42,5 @@ def setup_sparse_gaussian(ndims: int, iprec: int, GHsparsedir: str | None = None
         return nodes, weights
     else:
         bs_error_abort(
-            f"We only do sparse integration in one or two dimensions, not {ndims}"
+            f"We only do sparse integration in one to five dimensions, not {ndims}"
         )
-
-
-if __name__ == "__main__":
-    n = 5
-    iprec = 13
-
-    nodes, weights = setup_sparse_gaussian(n, iprec)
-
-    def f(x):
-        return np.sum(x**2, 1)
-
-    intf = f(nodes) @ weights
-
-    print(f"Integral in {n} dimensions should be {n}, it is {intf: 10.6f}")

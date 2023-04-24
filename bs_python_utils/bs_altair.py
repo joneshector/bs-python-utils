@@ -1,17 +1,15 @@
 """ a personal library of Altair plots
 """
 
-from pathlib import Path
 from typing import Callable
 
 import altair as alt
 import numpy as np
 import pandas as pd
 from altair_saver import save as alt_save
-from vega_datasets import data
 
-from bs_python_utils.bsnputils import test_matrix, test_vector
-from bs_python_utils.bsutils import bs_error_abort, mkdir_if_needed
+from bs_python_utils.bsnputils import check_matrix, check_vector
+from bs_python_utils.bsutils import bs_error_abort
 
 
 def _maybe_save(ch: alt.Chart, save: str | None = None):
@@ -156,7 +154,7 @@ def alt_plot_fun(
     end: float,
     npoints: int = 100,
     save: str | None = None,
-):
+) -> alt.Chart:
     """
     plots the function `f` from `start` to `end`
 
@@ -187,9 +185,8 @@ def alt_plot_fun(
     return ch
 
 
-def alt_density(df: pd.DataFrame, str_x: str, save: str | None = None):
-    """
-    plots the density of `df[str_x]`
+def alt_density(df: pd.DataFrame, str_x: str, save: str | None = None) -> alt.Chart:
+    """plots the density of `df[str_x]`
 
     Args:
         df: the data with the `str_x` variable
@@ -223,7 +220,7 @@ def alt_linked_scatterplots(
     str_y: str,
     str_f: str,
     save: str | None = None,
-):
+) -> alt.Chart:
     """
     two scatterplots: of `df[str_x1]` vs `df[str_y]` and of `df[str_x2]` vs `df[str_y]`,
     both with color as per `df[str_f]`. Selecting an interval in one shows up in the other.
@@ -258,7 +255,7 @@ def alt_linked_scatterplots(
 
 def alt_scatterplot_with_histo(
     df: pd.DataFrame, str_x: str, str_y: str, str_f: str, save: str | None = None
-):
+) -> alt.Chart:
     """
     scatterplots  `df[str_x]` vs `df[str_y]` with colors as per `df[str_f]`
     allows to select an interval and histograns the counts of `df[str_f]` in the interval
@@ -310,7 +307,7 @@ def alt_faceted_densities(
     legend_title: str | None = None,
     save: str | None = None,
     max_cols: int | None = 4,
-):
+) -> alt.Chart:
     """
     plots the density of `df[str_x]` by `df[str_f]` in column facets
 
@@ -484,9 +481,8 @@ def alt_stacked_area(
     str_x: str,
     str_y: str,
     str_f: str,
-    time_series=False,
+    time_series: bool = False,
     title: str | None = None,
-    legend_title: str | None = None,
     save: str | None = None,
 ) -> alt.Chart:
     """
@@ -499,7 +495,6 @@ def alt_stacked_area(
         str_f: the name of a categorical column
         time_series: `True` if `str_x` is a time series
         title: a title for the plot
-        legend_title: a title for the legend
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
@@ -566,7 +561,7 @@ def alt_stacked_area_facets(
 
 def _stack_estimates(
     estimate_names: str | list[str], estimates: np.ndarray, df: pd.DataFrame
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, list[str]]:
     """
     adds to a dataframe `df` columns with names `estimate_names` for various `estimates of one coefficient
 
@@ -581,7 +576,7 @@ def _stack_estimates(
     df1 = df.copy()
     n_estimates = 1 if isinstance(estimate_names, str) else len(estimate_names)
     if n_estimates == 1:
-        size_est = test_vector(estimates, "_stack_estimates")
+        size_est = check_vector(estimates, "_stack_estimates")
         if size_est != n_estimates:
             bs_error_abort(
                 f"_stack_estimates: we have {n_estimates} names of estimators and"
@@ -590,7 +585,7 @@ def _stack_estimates(
         df1[estimate_names] = estimates
         ordered_estimates = [estimate_names, "True value"]
     else:
-        shape_est = test_matrix(estimates, "_stack_estimates")
+        shape_est = check_matrix(estimates, "_stack_estimates")
         if shape_est[1] != n_estimates:
             bs_error_abort(
                 f"_stack_estimates: we have {n_estimates} names of estimators and"
@@ -629,10 +624,10 @@ def plot_parameterized_estimates(
     Returns:
         the `alt.Chart` object
     """
-    n_vals = test_vector(parameter_values)
+    n_vals = check_vector(parameter_values)
     n_coeffs = 1 if isinstance(coeff_names, str) else len(coeff_names)
     if n_coeffs == 1:
-        n_true = test_vector(true_values, "plot_parameterized_estimates")
+        n_true = check_vector(true_values, "plot_parameterized_estimates")
         if n_true != n_vals:
             bs_error_abort(
                 f"plot_parameterized_estimates: we have {n_true} values and"
@@ -656,7 +651,7 @@ def plot_parameterized_estimates(
             )
         )
     else:
-        n_true, n_c = test_matrix(true_values, "plot_parameterized_estimates")
+        n_true, n_c = check_matrix(true_values, "plot_parameterized_estimates")
         if n_true != n_vals:
             bs_error_abort(
                 f"plot_parameterized_estimates: we have {n_true} true values and"
@@ -736,14 +731,14 @@ def plot_true_sim_facets(
         the `alt.Chart` object
     """
     n_stats = len(stat_names)
-    nvals = test_vector(parameter_values, "plot_true_sim_facets")
-    nv_true, n_stat_true = test_matrix(stat_true, "plot_true_sim_facets")
+    nvals = check_vector(parameter_values, "plot_true_sim_facets")
+    nv_true, n_stat_true = check_matrix(stat_true, "plot_true_sim_facets")
     if nv_true != nvals:
         bs_error_abort(
             f"plot_true_sim_facets: we have {nvals} parameter values and {nv_true} for"
             " stat_true."
         )
-    nv_est, n_stat_est = test_matrix(stat_sim, "plot_true_sim_facets")
+    nv_est, n_stat_est = check_matrix(stat_sim, "plot_true_sim_facets")
     if nv_est != nvals:
         bs_error_abort(
             f"plot_true_sim_facets: we have {nvals} parameter values and {nv_est} for"
@@ -835,21 +830,21 @@ def plot_true_sim2_facets(
         the `alt.Chart` object
     """
     n_stats = len(stat_names)
-    nvals = test_vector(parameter_values, "plot_true_sim2_facets")
-    nv_true, n_stat_true = test_matrix(stat_true, "plot_true_sim2_facets")
+    nvals = check_vector(parameter_values, "plot_true_sim2_facets")
+    nv_true, n_stat_true = check_matrix(stat_true, "plot_true_sim2_facets")
     if nv_true != nvals:
         bs_error_abort(f"we have {nvals} parameter values and {nv_true} for stat_true.")
     if n_stat_true != n_stats:
         bs_error_abort(f"we have {n_stats} names for {n_stat_true} true statistics.")
 
-    nv_est1, n_stat_est1 = test_matrix(stat_sim1, "plot_true_sim2_facets")
+    nv_est1, n_stat_est1 = check_matrix(stat_sim1, "plot_true_sim2_facets")
     if nv_est1 != nvals:
         bs_error_abort(f"we have {nvals} parameter values and {nv_est1} for stat_sim1.")
     if n_stat_est1 != n_stats:
         bs_error_abort(
             f"we have {n_stats} names for {n_stat_est1} estimated statistics."
         )
-    nv_est2, n_stat_est2 = test_matrix(stat_sim2, "plot_true_sim2_facets")
+    nv_est2, n_stat_est2 = check_matrix(stat_sim2, "plot_true_sim2_facets")
     if nv_est2 != nvals:
         bs_error_abort(f"we have {nvals} parameter values and {nv_est2} for stat_sim2.")
     if n_stat_est2 != n_stats:
@@ -930,171 +925,3 @@ def alt_tick_plots(
     _maybe_save(ch, save)
 
     return ch
-
-
-if __name__ == "__main__":
-    _ = mkdir_if_needed(Path.cwd() / "altair_figs")
-
-    cars = data.cars()
-
-    ch = alt_superposed_lineplot(
-        cars,
-        "Horsepower",
-        "Weight_in_lbs",
-        "Origin",
-        save="altair_figs/cars_superposed_lineplot",
-    )
-
-    ch = alt_superposed_faceted_lineplot(
-        cars,
-        "Horsepower",
-        "Weight_in_lbs",
-        "Origin",
-        "Year",
-        save="altair_figs/cars_superposed_faceted_lineplot",
-    )
-
-    ch = alt_histogram_continuous(
-        cars, "Horsepower", save="altair_figs/cars_histo_cont"
-    )
-
-    ch = alt_histogram_by(
-        cars, "Origin", "Horsepower", str_agg="median", save="altair_figs/cars_histo_by"
-    )
-
-    elec = data.iowa_electricity()
-
-    ch = alt_stacked_area(
-        elec,
-        "year",
-        "net_generation",
-        "source",
-        time_series=True,
-        title="Generators",
-        save="altair_figs/elec_stacked_areas",
-    )
-
-    ch = alt_stacked_area_facets(
-        cars,
-        "Year",
-        "Displacement",
-        "Name",
-        "Origin",
-        time_series=True,
-        save="altair_figs/cars_stacked_areas_facets",
-    )
-
-    ch = alt_scatterplot(
-        cars,
-        "Year",
-        "Displacement",
-        time_series=True,
-        title="Average car displacement",
-        aggreg="average",
-        save="altair_figs/cars_scatter",
-    )
-
-    ch = alt_scatterplot(
-        cars,
-        "Year",
-        "Displacement",
-        time_series=True,
-        title="Average car displacement",
-        aggreg="average",
-        save="altair_figs/cars_scatter_labx",
-        xlabel="Model year",
-    )
-
-    ch = alt_scatterplot(
-        cars,
-        "Horsepower",
-        "Displacement",
-        title="Car displacement",
-        color="Origin",
-        selection=True,
-        save="altair_figs/cars_scatter_color",
-        xlabel="Horsepower",
-    )
-
-    ch = alt_linked_scatterplots(
-        cars,
-        "Horsepower",
-        "Displacement",
-        "Miles_per_Gallon",
-        "Origin",
-        save="altair_figs/cars_linked_scatters",
-    )
-
-    ch = alt_scatterplot_with_histo(
-        cars,
-        "Horsepower",
-        "Displacement",
-        "Origin",
-        save="altair_figs/cars_linked_scatter_histo",
-    )
-
-    ch = alt_density(cars, "Horsepower", save="altair_figs/horsepower_density")
-
-    ch = alt_faceted_densities(
-        cars, "Horsepower", "Origin", save="altair_figs/horsepower_distribs"
-    )
-
-    def fnp(x):
-        return x * x - 4.0
-
-    ch = alt_plot_fun(fnp, -2.0, 3.0, save="altair_figs/plot_function")
-
-    # test plot_parameterized_estimates
-    nvals = 50
-    vals_p = np.arange(nvals) / (nvals - 1.0)
-    true_vals = np.column_stack((vals_p, np.ones(nvals)))
-    estimates_a = np.random.normal(size=((nvals, 2)), scale=0.2) + vals_p.reshape(
-        (-1, 1)
-    )
-    estimates_b = np.random.normal(size=((nvals, 2)), scale=0.2) + np.ones((nvals, 2))
-    estimates = np.zeros((nvals, 2, 2))
-    estimates[..., 0] = estimates_a
-    estimates[..., 1] = estimates_b
-
-    ch = plot_parameterized_estimates(
-        "Value of p",
-        vals_p,
-        ["a", "b"],
-        true_vals,
-        ["MLE", "MM"],
-        estimates,
-        colors=["black", "green", "blue"],
-        save="altair_figs/ppe.html",
-    )
-
-    stats = np.reshape(estimates, (nvals, 4))
-    true_vals = stats + np.random.normal(loc=-0.1, scale=0.2, size=stats.shape)
-    ch = plot_true_sim_facets(
-        "Value of p",
-        vals_p,
-        ["a", "b", "c", "d"],
-        true_vals,
-        stats,
-        colors=["black", "red"],
-        ncols=2,
-        save="altair_figs/ptsf.html",
-    )
-
-    stats2 = stats + np.random.normal(loc=0.1, scale=0.2, size=stats.shape)
-    ch = plot_true_sim2_facets(
-        "Value of p",
-        vals_p,
-        ["a", "b", "c", "d"],
-        true_vals,
-        stats,
-        stats2,
-        colors=["black", "red", "green"],
-        ncols=2,
-        save="altair_figs/pts2f.html",
-    )
-
-    ch = alt_tick_plots(cars, "Weight_in_lbs", save="altair_figs/weight_ticks")
-
-    ch = alt_tick_plots(
-        cars, ["Horsepower", "Weight_in_lbs"], save="altair_figs/horse_weight_ticks"
-    )

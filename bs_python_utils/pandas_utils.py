@@ -5,7 +5,7 @@ from itertools import product
 import numpy as np
 import pandas as pd
 
-from bs_python_utils.bsnputils import bs_error_abort, test_vector_or_matrix
+from bs_python_utils.bsnputils import bs_error_abort, check_vector_or_matrix
 from bs_python_utils.bsutils import print_stars
 
 
@@ -19,12 +19,14 @@ def bspd_print(
     """Pretty-prints a data frame
 
     Args:
-        * df: any data frame
-        * s: an optional title string
-        * max_rows: maximum number of rows to print (all by default)
-        * max_cols: maximum number of columns to print (all by default)
-        * precision: of numbers. 3 digits by default.
-    Returns: nothing.
+        df: any data frame
+        s: an optional title string
+        max_rows: maximum number of rows to print (all by default)
+        max_cols: maximum number of columns to print (all by default)
+        precision: of numbers. 3 digits by default.
+
+    Returns:
+        nothing.
     """
 
     print_stars(s)
@@ -149,7 +151,7 @@ def bspd_statsdf(
         df = pd.DataFrame(big_T, columns=big_names, copy=True)
 
     else:  # only one element in T
-        ndims_T = test_vector_or_matrix(T)
+        ndims_T = check_vector_or_matrix(T)
         if ndims_T == 1:
             if not isinstance(col_names, str):
                 bs_error_abort(f"T is a vector but col_names is {col_names}")
@@ -164,7 +166,7 @@ def bspd_statsdf(
     return df
 
 
-def _test_names_n(col_names: list[str]) -> list[int]:
+def _check_names_n(col_names: list[str]) -> list[int]:
     """
     Tests that if a name in col_names ends with `_n`, with `n` an integer, then all names do
 
@@ -215,7 +217,7 @@ def bspd_prepareplot(df: pd.DataFrame) -> pd.DataFrame:
         and 'Group' if there are several integers
     """
     # check the names of the columns
-    values_integers = _test_names_n(df.columns)
+    values_integers = _check_names_n(df.columns)
     n_values_integers = len(values_integers)
 
     df2 = df.copy()

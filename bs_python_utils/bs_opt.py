@@ -1,13 +1,13 @@
 """ interface to scipy.optimize """
 from dataclasses import dataclass
 from math import sqrt
-from typing import Callable, Iterable, Optional, Union, cast
+from typing import Any, Callable, Iterable, Optional, Union, cast
 
 import numpy as np
 import scipy.linalg as spla
 import scipy.optimize as spopt
 
-from bs_python_utils.bsnputils import TwoArrays, npmaxabs, test_vector
+from bs_python_utils.bsnputils import TwoArrays, check_vector, npmaxabs
 from bs_python_utils.bssputils import describe_array
 from bs_python_utils.bsutils import bs_error_abort, print_stars
 from bs_python_utils.Timer import timeit
@@ -42,7 +42,7 @@ def print_optimization_results(
 
     Args:
         resus: results from optimization
-        str title: a title
+        title: a title
 
     Returns:
         just prints
@@ -348,7 +348,7 @@ def minimize_some_fixed(
     fixed_vals: np.ndarray | None,
     options: dict | None = None,
     bounds: list[tuple[float, float]] | None = None,
-):
+) -> Any:
     """
     minimize a function with some variables fixed, using L-BFGS-B
 
@@ -377,7 +377,7 @@ def minimize_some_fixed(
         )
     else:
         fixed_vars = cast(list, fixed_vars)
-        n_fixed = test_vector(fixed_vals)
+        n_fixed = check_vector(fixed_vals)
         fixed_vals = cast(np.ndarray, fixed_vals)
         if len(fixed_vars) != n_fixed:
             bs_error_abort(

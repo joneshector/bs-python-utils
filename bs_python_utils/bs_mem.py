@@ -146,21 +146,3 @@ def memory_display_top_diffs(
         print(f"{len(other)} other: {size / 1024:.1f} KiB")
     total = sum(stat.size for stat in top_stats)
     print("Total allocated size: %.1f KiB" % (total / 1024))
-
-
-if __name__ == "__main__":
-    tracemalloc.start()
-    list_ex = list(range(10000))
-    import numpy as np
-
-    v1 = np.ones(54546)
-    snapshot1 = tracemalloc.take_snapshot()
-    memory_display_top(snapshot1)
-    d = {i: li for (i, li) in enumerate(list_ex)}
-    m = np.random.normal(size=(3498, 12))
-    memory_usage(5)
-    snapshot2 = tracemalloc.take_snapshot()
-    memory_display_top_diffs(snapshot1, snapshot2)
-    tracemalloc.stop()
-    del d
-    memory_usage(5)

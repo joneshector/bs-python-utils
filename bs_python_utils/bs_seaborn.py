@@ -52,11 +52,9 @@ def bs_sns_bar_x_byf(
         df: dataframe, should contain columns `xstr` and `fstr`
         xstr: column name of x
         fstr: column name of f
-        gstr: column name of g
         statistic: statistic to plot (by default, the mean)
         label_x: label of x
         label_f: label of f
-        label_g: label of g in legend
         title: title of plot
 
     Returns:
@@ -174,35 +172,3 @@ def bs_sns_density_estimates(
     g.add_legend()
 
     return g
-
-
-if __name__ == "__main__":
-    cars = sns.load_dataset("mpg")
-
-    g1 = bs_sns_bar_x_byf(
-        cars,
-        "horsepower",
-        "cylinders",
-        label_x="Horsepower",
-        label_f="Number of cylinders",
-        title="Mean HP by number of cylinders",
-    )
-
-    g2 = bs_sns_bar_x_byfg(
-        cars,
-        "horsepower",
-        "cylinders",
-        "origin",
-        label_x="Horsepower",
-        label_f="Number of cylinders",
-        label_g="Origin",
-        title="Mean HP by number of cylinders and origin",
-    )
-
-    # change labels in legend
-    l2 = bs_sns_get_legend(g2)
-    labels2 = ["USA", "Japan", "Europe"]
-    for t, lab in zip(l2.texts, labels2, strict=True):
-        t.set_text(lab)
-
-    plt.show()
