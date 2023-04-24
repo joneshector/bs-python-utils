@@ -1,6 +1,5 @@
 """examples using my Altair functions"""
 
-from pathlib import Path
 
 import numpy as np
 from vega_datasets import data
@@ -23,10 +22,6 @@ from bs_python_utils.bs_altair import (
     plot_true_sim2_facets,
     plot_true_sim_facets,
 )
-from bs_python_utils.bsutils import mkdir_if_needed
-
-FIG_DIRECTORY = "altair_figs"
-save_path = mkdir_if_needed(Path.cwd() / FIG_DIRECTORY)
 
 cars = data.cars()
 
@@ -35,7 +30,7 @@ ch = alt_superposed_lineplot(
     "Horsepower",
     "Weight_in_lbs",
     "Origin",
-    save=save_path / "cars_superposed_lineplot",
+    save="cars_superposed_lineplot",
 )
 
 ch = alt_superposed_faceted_lineplot(
@@ -44,13 +39,13 @@ ch = alt_superposed_faceted_lineplot(
     "Weight_in_lbs",
     "Origin",
     "Year",
-    save=save_path / "cars_superposed_faceted_lineplot",
+    save="cars_superposed_faceted_lineplot",
 )
 
-ch = alt_histogram_continuous(cars, "Horsepower", save=save_path / "cars_histo_cont")
+ch = alt_histogram_continuous(cars, "Horsepower", save="cars_histo_cont")
 
 ch = alt_histogram_by(
-    cars, "Origin", "Horsepower", str_agg="median", save=save_path / "cars_histo_by"
+    cars, "Origin", "Horsepower", str_agg="median", save="cars_histo_by"
 )
 
 elec = data.iowa_electricity()
@@ -62,7 +57,7 @@ ch = alt_stacked_area(
     "source",
     time_series=True,
     title="Generators",
-    save=save_path / "elec_stacked_areas",
+    save="elec_stacked_areas",
 )
 
 ch = alt_stacked_area_facets(
@@ -72,7 +67,7 @@ ch = alt_stacked_area_facets(
     "Name",
     "Origin",
     time_series=True,
-    save=save_path / "cars_stacked_areas_facets",
+    save="cars_stacked_areas_facets",
 )
 
 ch = alt_scatterplot(
@@ -82,7 +77,7 @@ ch = alt_scatterplot(
     time_series=True,
     title="Average car displacement",
     aggreg="average",
-    save=save_path / "cars_scatter",
+    save="cars_scatter",
 )
 
 ch = alt_scatterplot(
@@ -92,7 +87,7 @@ ch = alt_scatterplot(
     time_series=True,
     title="Average car displacement",
     aggreg="average",
-    save=save_path / "cars_scatter_labx",
+    save="cars_scatter_labx",
     xlabel="Model year",
 )
 
@@ -103,7 +98,7 @@ ch = alt_scatterplot(
     title="Car displacement",
     color="Origin",
     selection=True,
-    save=save_path / "cars_scatter_color",
+    save="cars_scatter_color",
     xlabel="Horsepower",
 )
 
@@ -113,7 +108,7 @@ ch = alt_linked_scatterplots(
     "Displacement",
     "Miles_per_Gallon",
     "Origin",
-    save=save_path / "cars_linked_scatters",
+    save="cars_linked_scatters",
 )
 
 ch = alt_scatterplot_with_histo(
@@ -121,21 +116,19 @@ ch = alt_scatterplot_with_histo(
     "Horsepower",
     "Displacement",
     "Origin",
-    save=save_path / "cars_linked_scatter_histo",
+    save="cars_linked_scatter_histo",
 )
 
-ch = alt_density(cars, "Horsepower", save=save_path / "horsepower_density")
+ch = alt_density(cars, "Horsepower", save="horsepower_density")
 
-ch = alt_faceted_densities(
-    cars, "Horsepower", "Origin", save=save_path / "horsepower_distribs"
-)
+ch = alt_faceted_densities(cars, "Horsepower", "Origin", save="horsepower_distribs")
 
 
 def fnp(x):
     return x * x - 4.0
 
 
-ch = alt_plot_fun(fnp, -2.0, 3.0, save=save_path / "plot_function")
+ch = alt_plot_fun(fnp, -2.0, 3.0, save="plot_function")
 
 # test plot_parameterized_estimates
 nvals = 50
@@ -155,7 +148,7 @@ ch = plot_parameterized_estimates(
     ["MLE", "MM"],
     estimates,
     colors=["black", "green", "blue"],
-    save=save_path / "ppe.html",
+    save="ppe.html",
 )
 
 stats = np.reshape(estimates, (nvals, 4))
@@ -168,7 +161,7 @@ ch = plot_true_sim_facets(
     stats,
     colors=["black", "red"],
     ncols=2,
-    save=save_path / "ptsf.html",
+    save="ptsf.html",
 )
 
 stats2 = stats + np.random.normal(loc=0.1, scale=0.2, size=stats.shape)
@@ -181,11 +174,9 @@ ch = plot_true_sim2_facets(
     stats2,
     colors=["black", "red", "green"],
     ncols=2,
-    save=save_path / "pts2f.html",
+    save="pts2f.html",
 )
 
-ch = alt_tick_plots(cars, "Weight_in_lbs", save=save_path / "weight_ticks")
+ch = alt_tick_plots(cars, "Weight_in_lbs", save="weight_ticks")
 
-ch = alt_tick_plots(
-    cars, ["Horsepower", "Weight_in_lbs"], save=save_path / "horse_weight_ticks"
-)
+ch = alt_tick_plots(cars, ["Horsepower", "Weight_in_lbs"], save="horse_weight_ticks")

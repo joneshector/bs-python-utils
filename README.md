@@ -14,5 +14,8 @@ My Python utilities.
 
 ### Release notes
 
+#### 0.0.3  (April 24, 2023)
+Satisfied mypy.
+
 #### 0.0.2  (April 24, 2023)
 Fixed main PyPI page.

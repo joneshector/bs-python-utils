@@ -23,7 +23,7 @@ def setup_sparse_gaussian(
 
     Returns:
         a pair of  arrays `nodes` and `weights`;
-        `nodes` has `ndims`-1 columns and weights is a vector
+        `nodes` has `ndims`-1 columns and `weights` is a vector
     """
     GHdir = (
         Path.home() / "Dropbox" / "GHsparseGrids"
@@ -44,3 +44,4 @@ def setup_sparse_gaussian(
         bs_error_abort(
             f"We only do sparse integration in one to five dimensions, not {ndims}"
         )
+        return np.zeros(1), np.zeros(1)  # for mypy
