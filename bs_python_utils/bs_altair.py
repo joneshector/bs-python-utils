@@ -1,7 +1,7 @@
 """ a personal library of Altair plots
 """
 
-from typing import Callable
+from typing import Callable, cast
 
 import altair as alt
 import numpy as np
@@ -595,7 +595,7 @@ def _stack_estimates(
             df1[est_name] = estimates[:, i_est]
         ordered_estimates = [*estimate_names, "True value"]
 
-    return df1, ordered_estimates
+    return df1, cast(list[str], ordered_estimates)
 
 
 def plot_parameterized_estimates(
