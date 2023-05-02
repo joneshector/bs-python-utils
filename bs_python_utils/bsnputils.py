@@ -955,3 +955,91 @@ def gaussian_expectation(
                 integral_val += weights[i] * f(nodes[i], pars)
 
     return cast(np.ndarray, integral_vec) if vectorized else cast(float, integral_val)
+
+
+def legendre_polynomials(
+    x: np.ndarray,
+    max_deg: int,
+    a: float = -1.0,
+    b: float = 1.0,
+    no_constant: bool = False,
+) -> np.ndarray:
+    """evaluates the Legendre polynomials over x in the interval [a, b]
+
+    Args:
+        x: the points where the polynomials are to be evaluated
+        max_deg: the maximum degree
+        a: the start of the interval, classically -1
+        b: the end of the interval, classically 1
+        no_constant: if True, delete the constant polynomial
+
+    Returns:
+        an array of (max_deg+1) arrays of the shape of x
+    """
+    sx = check_vector(x)
+    if a > np.min(x):
+        sys.exit("legendre_polynomials: points below start of interval")
+    if b < np.max(x):
+        sys.exit("legendre_polynomials: points above end of interval")
+    p = np.zeros((sx, max_deg + 1))
+    x_transf = 2.0 * (x - a) / (b - a) - 1.0
+    p[:, 0] = np.ones_like(x)
+    p[:, 1] = x_transf
+    for deg in range(2, max_deg + 1):
+        p2 = (2 * deg - 1) * (p[:, deg - 1] * x_transf) - (deg - 1) * p[:, deg - 2]
+        p[:, deg] = p2 / deg
+    polys_p = p[:, 1:] if no_constant else p
+    return polys_p
+
+
+def quantile_transform(v: np.ndarray) -> np.ndarray:
+    """transform a vector of counts into the corresponding quantiles
+
+    Args:
+        v:  a vector of counts
+
+    Returns:
+         the corresponding quantiles
+    """
+    n = check_vector(v)
+    q = np.zeros(n)
+    for i in range(n):
+        q[i] = np.sum(v <= v[i]) / (n + 1)
+    return q
+
+
+def print_quantiles(
+    v: np.ndarray | Iterable[np.ndarray], quantiles: np.ndarray
+) -> np.ndarray:
+    """print these quantiles of the array(s)
+
+    Args:
+        v:  a vector or an iterable of vectors
+        quantiles: quantiles in [0,1]
+
+    Returns:
+         the corresponding quantiles as a vector or a matrix
+    """
+    nq = check_vector(quantiles)
+    if isinstance(v, np.ndarray):
+        qvals = np.quantile(v, quantiles)
+        for q, qv in zip(quantiles, qvals, strict=True):
+            print(f"Quantile {q: .3f}: {qv: >10.3f}")
+    elif isinstance(v, Iterable):
+        v = list(v)
+        for v_i in v:
+            _ = check_vector(v_i)
+        nv = len(v)
+        qvals = np.zeros((nq, nv))
+        for i in range(nv):
+            qvals[:, i] = np.quantile(v[i], quantiles)
+        for iq, q in enumerate(quantiles):
+            s = f"Quantile {q: .3f}: "
+            qv = qvals[iq, :]
+            for i in range(nv):
+                s += f"  {qv[i]: >10.3f}"
+            print(f"{s}")
+    else:
+        bs_error_abort("v must be  a vector or a list of vectors")
+
+    return cast(np.ndarray, qvals)

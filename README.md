@@ -14,6 +14,9 @@ My Python utilities.
 
 ### Release notes
 
+#### 0.0.4 (May 2, 2023)
+Added Legendre polynomials and quantile routines in `bsnputils`.
+
 #### 0.0.3  (April 24, 2023)
 Satisfied mypy.
 
