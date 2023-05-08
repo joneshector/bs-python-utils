@@ -9,6 +9,7 @@ from bs_python_utils.bsutils import (
     bsexp,
     bslog,
     bsxlogx,
+    final_s,
     find_first,
 )
 
@@ -160,3 +161,9 @@ def test_bsexp_above():
     assert isclose(ex4, ex)
     assert isclose(dex4, dex)
     assert isclose(d2ex4, d2ex)
+
+
+def test_final_s():
+    assert final_s(0, "simulation") == "0 simulation"
+    assert final_s(1, "simulation") == "1 simulation"
+    assert final_s(13, "simulation") == "13 simulations"

@@ -60,6 +60,21 @@ def bs_error_abort(msg: str = "error, aborting") -> None:
     sys.exit(1)
 
 
+def final_s(n: int, word: str) -> str:
+    """
+    pluralizes word if n > 1
+
+    Args:
+        n: how many times
+        word: to be pluralized, maybe
+
+    Returns:
+        `1 word` or `n words`
+    """
+    suffix = "s" if n > 1 else ""
+    return f"{n} {word}{suffix}"
+
+
 def bs_switch(
     match: str, dico: dict, strict: bool = True, default: Any = "no match"
 ) -> Any:
