@@ -13,6 +13,10 @@ My Python utilities.
 
 ### Release notes
 
+#### 0.0.5 (May 8, 2023)
+
+Added `final_s` in `bsutils`.
+
 #### 0.0.4 (May 2, 2023)
 
 Added Legendre polynomials and quantile routines in `bsnputils`.
