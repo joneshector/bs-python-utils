@@ -13,6 +13,11 @@ My Python utilities.
 
 ### Release notes
 
+
+#### 0.0.6 (May 9, 2023)
+
+Improved docs.
+
 #### 0.0.5 (May 8, 2023)
 
 Added `final_s` in `bsutils`.

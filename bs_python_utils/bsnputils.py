@@ -20,6 +20,115 @@ SixArrays = tuple[
 ]
 
 
+def check_vector(v: Any, fun_name: str = None) -> int:
+    """
+    test that `v` is a vector; aborts otherwise
+
+    Args:
+        v: a vector, we hope
+        fun_name: name of the calling function
+
+    Returns:
+        the size if successful
+    """
+    fun_str = ["" if fun_name is None else fun_name + ":"]
+    if not isinstance(v, np.ndarray):
+        bs_error_abort(f"{fun_str} v should be a Numpy array")
+    v = cast(np.ndarray, v)
+    ndims_v = v.ndim
+    if ndims_v != 1:
+        bs_error_abort(f"{fun_str} v should have one dimension, not {ndims_v}")
+    return cast(int, v.size)
+
+
+def check_matrix(x: Any, fun_name: str = None) -> tuple[int, int]:
+    """
+    test that `x` is a matrix; aborts otherwise
+
+    Args:
+        x: a matrix, we hope
+        fun_name: name of the calling function
+
+    Returns:
+        the shape if successful
+    """
+    fun_str = ["" if fun_name is None else fun_name + ":"]
+    if not isinstance(x, np.ndarray):
+        bs_error_abort(f"{fun_str} Xx should be a Numpy array")
+    x = cast(np.ndarray, x)
+    ndims_x = x.ndim
+    if ndims_x != 2:
+        bs_error_abort(f"{fun_str} x should have two dimensions, not {ndims_x}")
+    return cast(tuple[int, int], x.shape)
+
+
+def check_vector_or_matrix(x: Any, fun_name: str = None) -> int:
+    """
+    test that `x` is a vector or a matrix; aborts otherwise
+
+    Args:
+        x: a vector or matrix, we hope
+        fun_name: name of the calling function
+
+    Returns:
+        the number of dimensions of `x` (1 or 2)
+    """
+    fun_str = ["" if fun_name is None else fun_name + ":"]
+    if not isinstance(x, np.ndarray):
+        bs_error_abort(f"{fun_str} X should be a Numpy array")
+    x = cast(np.ndarray, x)
+    ndims_x = x.ndim
+    if ndims_x != 1 and ndims_x != 2:
+        bs_error_abort(f"{fun_str} x should have at most two dimensions, not {ndims_x}")
+    return cast(int, ndims_x)
+
+
+def check_square(A: Any, fun_name: str = None) -> int:
+    """
+    test that an object used in `fun_name` is a square matrix
+
+    Args:
+        A: square matrix, we hope
+        fun_name: the name of the calling function
+
+    Returns:
+        the number of rows and columns of `A`
+    """
+    fun_str = ["" if fun_name is None else fun_name + ":"]
+    if not isinstance(A, np.ndarray):
+        bs_error_abort(f"{fun_str} A should be a Numpy array")
+    A = cast(np.ndarray, A)
+    if A.ndim == 2:
+        n, nv = A.shape
+        if nv != n:
+            bs_error_abort(f"{fun_str} The matrix A should be square, not {A.shape}")
+    else:
+        bs_error_abort(f"{fun_name} A should have  two dimensions, not {A.ndim}")
+    return cast(int, n)
+
+
+def check_tensor(x: Any, n_dims: int, fun_name: str = None) -> tuple[int, ...]:
+    """
+    test that `x` is an `n_dims` dimensional array; aborts otherwise
+
+    Args:
+        x: an `n_dims` dimensional array, we hope
+        fun_name: name of the calling function
+
+    Returns:
+        the shape if successful
+    """
+    fun_str = ["" if fun_name is None else fun_name + ":"]
+    if not isinstance(x, np.ndarray):
+        bs_error_abort(f"{fun_str} x should be a Numpy array")
+    x = cast(np.ndarray, x)
+    ndims_x = x.ndim
+    if ndims_x != n_dims:
+        bs_error_abort(f"{fun_str} x should have {n_dims} dimensions, not {ndims_x}")
+        return (0,)  # for mypy
+    return cast(tuple[int, ...], x.shape)
+
+
 # Numpy parallel RNG
 def generate_RNG_streams(
     nsim: int, initial_seed: int = 13091962
@@ -204,7 +313,7 @@ def nplog(
     verbose: bool = False,
 ) -> np.ndarray | TwoArrays | ThreeArrays:
     """
-    `C^2` extension of  `\\ln(a)` below `eps`, perhaps with derivatives
+    $C^2$ extension of  $\\ln(a)$ below `eps`, perhaps with derivatives
 
     Args:
         arr: any Numpy array
@@ -213,7 +322,7 @@ def nplog(
         verbose: prints debugging info
 
     Returns:
-        `\\ln(a)` `C^2`-extended below `eps`, perhaps with derivatives
+        $\\ln(a)$  $C^2$-extended below `eps`, perhaps with derivatives
     """
     if deriv not in [0, 1, 2]:
         bs_error_abort(f"deriv can only be 0, 1, or 2; not {deriv}")
@@ -260,7 +369,7 @@ def npexp(
     verbose: bool = False,
 ) -> np.ndarray | TwoArrays | ThreeArrays:
     """
-    `C^2` extension of  `\\exp(a)` above `bigx` and below `lowx`,
+    $C^2$ extension of  $\\exp(a)$ above `bigx` and below `lowx`,
     perhaps with derivatives
 
     Args:
@@ -272,7 +381,7 @@ def npexp(
 
 
     Returns:
-        `\\exp(a)`  `C^2`-extended above `bigx` and below `lowx`,
+        $\\exp(a)$  $C^2$-extended above `bigx` and below `lowx`,
         perhaps with derivatives
     """
     if deriv not in [0, 1, 2]:
@@ -483,81 +592,6 @@ def bsgrid(v: np.ndarray, w: np.ndarray) -> np.ndarray:
     v2 = np.tile(w, m)
     return np.column_stack((v1, v2))
 
-    """
-    This is a Python function that tests whether a given input is a vector and returns its size if
-    successful.
-    
-    :param v: `v` is a numpy array that is expected to be a vector
-    :type v: np.ndarray
-    :param fun_name: `fun_name` is an optional parameter that represents the name of the calling
-    function. If provided, it will be used in error messages to indicate which function caused the
-    error. If not provided, the error message will not include the function name
-    :type fun_name: Optional[str]
-    """
-
-
-def check_vector(v: Any, fun_name: str = None) -> int:
-    """
-    test that `v` is a vector; aborts otherwise
-
-    Args:
-        v: a vector, we hope
-        fun_name: name of the calling function
-
-    Returns:
-        the size if successful
-    """
-    fun_str = ["" if fun_name is None else fun_name + ":"]
-    if not isinstance(v, np.ndarray):
-        bs_error_abort(f"{fun_str} v should be a Numpy array")
-    v = cast(np.ndarray, v)
-    ndims_v = v.ndim
-    if ndims_v != 1:
-        bs_error_abort(f"{fun_str} v should have one dimension, not {ndims_v}")
-    return cast(int, v.size)
-
-
-def check_matrix(x: Any, fun_name: str = None) -> tuple[int, int]:
-    """
-    test that `x` is a matrix; aborts otherwise
-
-    Args:
-        x: a matrix, we hope
-        fun_name: name of the calling function
-
-    Returns:
-        the shape if successful
-    """
-    fun_str = ["" if fun_name is None else fun_name + ":"]
-    if not isinstance(x, np.ndarray):
-        bs_error_abort(f"{fun_str} Xx should be a Numpy array")
-    x = cast(np.ndarray, x)
-    ndims_x = x.ndim
-    if ndims_x != 2:
-        bs_error_abort(f"{fun_str} x should have two dimensions, not {ndims_x}")
-    return cast(tuple[int, int], x.shape)
-
-
-def check_vector_or_matrix(x: Any, fun_name: str = None) -> int:
-    """
-    test that `x` is a vector or a matrix; aborts otherwise
-
-    Args:
-        x: a vector or matrix, we hope
-        fun_name: name of the calling function
-
-    Returns:
-        the number of dimensions of `x` (1 or 2)
-    """
-    fun_str = ["" if fun_name is None else fun_name + ":"]
-    if not isinstance(x, np.ndarray):
-        bs_error_abort(f"{fun_str} X should be a Numpy array")
-    x = cast(np.ndarray, x)
-    ndims_x = x.ndim
-    if ndims_x != 1 and ndims_x != 2:
-        bs_error_abort(f"{fun_str} x should have at most two dimensions, not {ndims_x}")
-    return cast(int, ndims_x)
-
 
 def bs_sqrt_pdmatrix(m: np.ndarray) -> np.ndarray:
     """
@@ -576,52 +610,6 @@ def bs_sqrt_pdmatrix(m: np.ndarray) -> np.ndarray:
     eigval_sqrt_diag = np.diag(eigval_sqrt)
     res = eigvec @ eigval_sqrt_diag @ eigvec.T
     return cast(np.ndarray, res)
-
-
-def check_square(A: Any, fun_name: str | None) -> int:
-    """
-    test that an object used in `fun_name` is a square matrix
-
-    Args:
-        A: square matrix, we hope
-        fun_name: the name of the calling function
-
-    Returns:
-        the number of rows and columns of `A`
-    """
-    fun_str = ["" if fun_name is None else fun_name + ":"]
-    if not isinstance(A, np.ndarray):
-        bs_error_abort(f"{fun_str} A should be a Numpy array")
-    A = cast(np.ndarray, A)
-    if A.ndim == 2:
-        n, nv = A.shape
-        if nv != n:
-            bs_error_abort(f"{fun_str} The matrix A should be square, not {A.shape}")
-    else:
-        bs_error_abort(f"{fun_name} A should have  two dimensions, not {A.ndim}")
-    return cast(int, n)
-
-
-def check_tensor(x: Any, n_dims: int, fun_name: str | None) -> tuple[int, ...]:
-    """
-    test that `x` is an `n_dims` dimensional array; aborts otherwise
-
-    Args:
-        x: an `n_dims` dimensional array, we hope
-        fun_name: name of the calling function
-
-    Returns:
-        the shape if successful
-    """
-    fun_str = ["" if fun_name is None else fun_name + ":"]
-    if not isinstance(x, np.ndarray):
-        bs_error_abort(f"{fun_str} x should be a Numpy array")
-    x = cast(np.ndarray, x)
-    ndims_x = x.ndim
-    if ndims_x != n_dims:
-        bs_error_abort(f"{fun_str} x should have {n_dims} dimensions, not {ndims_x}")
-        return (0,)  # for mypy
-    return cast(tuple[int, ...], x.shape)
 
 
 def make_lexico_grid(arr: np.ndarray) -> np.ndarray:
@@ -770,7 +758,7 @@ def npxlogx(
     verbose: bool = False,
 ) -> np.ndarray | TwoArrays | ThreeArrays:
     """
-    C^2` extension of  `a\\ln(a)` below `eps`, perhaps with derivatives
+    $C^2$ extension of  $a\\ln(a)$ below `eps`, perhaps with derivatives
 
     Args:
         arr: a Numpy array
@@ -779,7 +767,7 @@ def npxlogx(
         verbose: prints debugging info
 
     Returns:
-        `a\\ln(a)`  `C^2`-extended  below `eps`, perhaps with derivatives
+        $a\\ln(a)$  $C^2$-extended  below `eps`, perhaps with derivatives
     """
     if deriv not in [0, 1, 2]:
         bs_error_abort(f"deriv must be 0, 1, or 2; not {deriv}")
