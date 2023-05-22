@@ -9,7 +9,7 @@ copyright: Maintained by <a href="https://bsalanie.com">Bernard Salanie</a>.
 
 nav:
   - Home: index.md
-  - Modules: 
+  - API Reference: 
     - General utilities:
       - bsutils.md
       - bs_logging.md
@@ -78,9 +78,6 @@ extra:
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/bs-python-utils
 
-markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
 markdown_extensions:
   - attr_list
   - pymdownx.superfences
