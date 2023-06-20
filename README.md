@@ -13,6 +13,8 @@ My Python utilities.
 
 ### Release notes
 
+#### 0.1 (June 20, 2023)
+Added `grid_function` and the `chebyshev` module. 
 
 #### 0.0.6 (May 9, 2023)
 

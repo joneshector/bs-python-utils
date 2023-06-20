@@ -4,7 +4,7 @@ Contains various `numpy` utility programs.
 
 import sys
 from math import cos, exp, floor, log, pi, sqrt
-from typing import Any, Callable, Iterable, cast
+from typing import Any, Callable, Iterable, Union, cast
 
 import numpy as np
 from numpy.polynomial import Polynomial
@@ -18,6 +18,11 @@ FourArrays = tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
 SixArrays = tuple[
     np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray
 ]
+FloatOrArray = Union[float, np.ndarray]
+Function_x = Callable[[np.ndarray], float]
+Function_xa = Callable[[np.ndarray, int], float]
+Function_xargs = Callable[[np.ndarray, list], float]
+ArrayFunctionOfArray = Callable[[np.ndarray], np.ndarray]
 
 
 def check_vector(v: Any, fun_name: str = None) -> int:
@@ -127,6 +132,28 @@ def check_tensor(x: Any, n_dims: int, fun_name: str = None) -> tuple[int, ...]:
         bs_error_abort(f"{fun_str} x should have {n_dims} dimensions, not {ndims_x}")
         return (0,)  # for mypy
     return cast(tuple[int, ...], x.shape)
+
+
+def grid_function(
+    fun: Callable[[np.ndarray, np.ndarray], np.ndarray],
+    x_points: np.ndarray,
+    y_points: np.ndarray,
+) -> np.ndarray:
+    """apply a function f(x, y) on a lattice grid
+
+    Args:
+        fun: should return a matrix `(m, n)`  when called with two matrices `(m, n)`
+        x_points: an `m`-vector
+        y_points: an `n`-vector
+
+    Returns:
+        the `(m, n)` matrix of values of `fun` on the grid
+    """
+    _ = check_vector(x_points)
+    _ = check_vector(y_points)
+    X1, Y1 = np.meshgrid(x_points, y_points)
+    z_grid = fun(X1, Y1).T
+    return z_grid
 
 
 # Numpy parallel RNG
