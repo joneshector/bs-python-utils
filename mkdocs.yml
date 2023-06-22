@@ -19,6 +19,7 @@ nav:
     - Scientific:
       - bsnputils.md
       - bssputils.md
+      - chebyshev.md
       - pandas_utils.md
       - bsstats.md
       - sklearn_utils.md
