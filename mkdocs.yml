@@ -32,7 +32,7 @@ nav:
       - bs_seaborn.md
       - bs_altair.md
 plugins:
-  - search
+  - search:
   - mkdocstrings:
       handlers:
         python:

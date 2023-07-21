@@ -17,7 +17,7 @@ def timeit(func: Callable) -> Callable:
         start = time.perf_counter()
         result = func(*args, **kwargs)
         end = time.perf_counter()
-        print(f"{func.__name__} executed in {end - start:.6f} seconds")
+        print(f"{func.__name__} executed in {end - start:.3f} seconds")
         return result
 
     return wrapper

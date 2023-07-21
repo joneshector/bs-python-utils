@@ -13,6 +13,14 @@ My Python utilities.
 
 ### Release notes
 
+
+#### 0.3 (July 21, 2023)
+Added in Numpy utils a function to set upper and lower triangle to a scalar;
+and `minimize_free` in `bs_opt`.
+
+#### 0.2 (July 17, 2023)
+Fixed printing in accelerated gradient descent.
+
 #### 0.1 (June 20, 2023)
 Added `grid_function` and the `chebyshev` module. 
 

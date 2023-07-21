@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bs_python_utils"
-version = "0.1"
+version = "0.3"
 description = "my Python utilities"
 authors = ["Bernard Salanie <bsalanie@columbia.edu>"]
 repository = "https://github.com/bsalanie/bs-python-utils"
@@ -28,7 +28,7 @@ pre-commit = "^2.20.0"
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.4.2"
 mkdocs-material = "^8.5.10"
-mkdocstrings = {extras = ["python"], version = "^0.19.0"}
+mkdocstrings = {extras = ["python"], version = "^0.22.0"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

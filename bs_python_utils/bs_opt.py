@@ -218,10 +218,11 @@ def acc_grad_descent(
     maxiter: int = 10000,
 ) -> tuple[np.ndarray, int]:
     """
-    minimizes `(f+h)` by Accelerated Gradient Descent
-     where `f` is smooth and convex  and `h` is convex.
+    minimizes `(f+h)` by Accelerated Gradient Descent where `f` is smooth and convex  and `h` is convex.
 
     By default `h` is zero.
+    The convergence criterion is that the largest component of the absolute value of the gradient must be smaller than `tol`.
+
 
     Args:
         grad_f: grad_f of `f`; should return an `(n)` array from an `(n)` array \
@@ -229,14 +230,14 @@ def acc_grad_descent(
         x_init: initial guess, shape `(n)`
         prox_h: proximal projector of `h`, if any
         other_params: an iterable with additional parameters
-        verbose: if `True`, print diagnosis
-        tol: convergence criterion on absolute grad_f
+        verbose: if `True`, print remaining gradient error every 10 iterations
+        tol: convergence criterion on grad_f
         alpha: ceiling on step multiplier
         beta: floor on step multiplier
         maxiter: max number of iterations
 
     Returns: 
-        the candidate solution, and 1 if converged/0 if not
+        the candidate solution, and a convergence code (0 if successful, 1 if not)
     """
 
     # no proximal projection if no h
@@ -282,7 +283,7 @@ def acc_grad_descent(
 
         n_iter += 1
 
-        if verbose:
+        if verbose and n_iter % 10 == 0:
             print(f" AGD with grad_err = {grad_err} after {n_iter} iterations")
 
     x_conv = y
@@ -292,14 +293,14 @@ def acc_grad_descent(
     if verbose or print_result:
         if ret_code == 0:
             print_stars(
-                f" AGD converged with grad_err = {grad_err} after {iter} iterations"
+                f" AGD converged with grad_err = {grad_err} after {n_iter} iterations"
             )
         else:
             print_stars(
-                f" Problem in AGD: grad_err = {grad_err} after {iter} iterations"
+                f" Problem in AGD: grad_err = {grad_err} after {n_iter} iterations"
             )
 
-    return (x_conv, ret_code)
+    return x_conv, ret_code
 
 
 def _fix_some(
@@ -338,6 +339,7 @@ def _fix_some(
     return fixed_obj, fixed_grad_obj
 
 
+@timeit
 def minimize_some_fixed(
     obj: Callable,
     grad_obj: Callable,
@@ -358,7 +360,7 @@ def minimize_some_fixed(
         fixed_vals: their fixed values
         x_init: the initial values of all variables (those on fixed variables are not used)
         args: other parameters
-        options: any options passed on to scipy.optimize.minimize
+        options: any options passed on to `scipy.optimize.minimize`
         bounds: the bounds on all variables (those on fixed variables are not used)
 
     Returns:
@@ -414,6 +416,52 @@ def minimize_some_fixed(
         # and re-fill the values of the gradients
         g = grad_obj(np.array(t_full), args)
         resopt.jac = g
+
+    return resopt
+
+
+@timeit
+def minimize_free(
+    obj: Callable,
+    grad_obj: Callable,
+    x_init: np.ndarray,
+    args: Iterable,
+    options: dict | None = None,
+    bounds: list[tuple[float, float]] | None = None,
+) -> Any:
+    """
+    minimize a function on all of its variables, using BFGS or L-BFGS-B
+
+    Args:
+        obj: the original function
+        grad_obj: its gradient function
+        x_init: the initial values of all variables
+        args: other parameters
+        options: any options passed on to `scipy.optimize.minimize`
+        bounds: the bounds on all variables, if any
+
+    Returns:
+        the result of optimization, on all variables
+    """
+    if bounds is None:
+        resopt = spopt.minimize(
+            obj,
+            x_init,
+            method="BFGS",
+            args=args,
+            options=options,
+            jac=grad_obj,
+        )
+    else:
+        resopt = spopt.minimize(
+            obj,
+            x_init,
+            method="L-BFGS-B",
+            args=args,
+            options=options,
+            jac=grad_obj,
+            bounds=bounds,
+        )
 
     return resopt
 

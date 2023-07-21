@@ -24,9 +24,7 @@ from bs_python_utils.bsutils import bs_error_abort
 
 @dataclass
 class TslsResults:
-    """
-    contains full results of a TSLS regression
-    """
+    """contains the full results of a TSLS regression"""
 
     iv_estimates: float | np.ndarray | None
     r2_first_iv: float | np.ndarray | None
@@ -39,8 +37,7 @@ class TslsResults:
 
 
 def _powers_Z(Z: np.ndarray, degrees: np.ndarray) -> np.ndarray:
-    """
-    used internally by `proj_Z`; returns `\\prod_{k=1}^m  Z_{\\cdot k}^{l_k}`
+    """used internally by `proj_Z`; returns `\\prod_{k=1}^m  Z_{\\cdot k}^{l_k}`
 
     Args:
         Z: a matrix `(n, m)`
@@ -105,8 +102,7 @@ def _make_Zp(Z: np.ndarray, p: int) -> tuple[np.ndarray, int]:
 def proj_Z(
     W: np.ndarray, Z: np.ndarray, p: int = 1, verbose: bool = False
 ) -> tuple[np.ndarray, np.ndarray, float]:
-    """
-    project `W` on `Z` up to degree `p` interactions
+    """project `W` on `Z` up to degree `p` interactions
 
     Args:
         W: variable(s) `(nobs)` or `(nobs, nw)`
@@ -140,8 +136,7 @@ def proj_Z(
 
 
 def tsls(y: np.ndarray, X: np.ndarray, Z: np.ndarray) -> TslsResults:
-    """
-    TSLS of `y` on `X` with instruments `Z`
+    """TSLS of `y` on `X` with instruments `Z`
 
     Args:
         y: independent variable `(nobs)`
@@ -175,8 +170,7 @@ def reg_nonpar(
     n_sub: int | None = None,
     n_res: int | None = 1,
 ) -> tuple[KernelReg, np.ndarray]:
-    """
-    nonparametric regression of y on the columns of X;
+    """nonparametric regression of y on the columns of X;
     bandwidth chosen on a subsample of size nsub if nsub < nobs, and rescaled
 
     Args:
@@ -228,8 +222,7 @@ def reg_nonpar_fit(
     n_res: int = 1,
     verbose: bool = False,
 ) -> np.ndarray:
-    """
-    nonparametric regression of y on the columns of X; bandwidth chosen on a subsample of size nsub if nsub < nobs, and rescaled
+    """nonparametric regression of y on the columns of X; bandwidth chosen on a subsample of size nsub if nsub < nobs, and rescaled
 
     Args:
         y: a vector of size nobs
@@ -260,8 +253,7 @@ def flexible_reg(
     n_res: int = 1,
     verbose: bool = False,
 ) -> np.ndarray:
-    """
-    flexible regression  of `Y` on `X`
+    """flexible regression  of `Y` on `X`
 
     Args:
         Y: independent variable `(nobs)` or `(nobs, ny)`
@@ -318,8 +310,7 @@ def flexible_reg(
 def bs_multivariate_normal_pdf(
     values_x: np.ndarray, means_x: float | np.ndarray, cov_mat: float | np.ndarray
 ) -> np.ndarray:
-    """
-    Multivariate (or univariate) normal probability density function at values_x
+    """Multivariate (or univariate) normal probability density function at values_x
 
     Args:
         values_x: values at which to evaluate the pdf, an `n`-vector or an `(n, nvars)` matrix
@@ -366,8 +357,7 @@ def estimate_pdf(
     MIN_SIZE_NONPAR: int = 200,
     weights: np.ndarray | None = None,
 ) -> np.ndarray:
-    """
-    return an estimate of the conditional densities of `x` at points `values_x` (Silverman rule)
+    """return an estimate of the conditional densities of `x` at points `values_x` (Silverman rule)
 
     Args:
         x_obs: an `n`-vector or an `(n, nvars)` matrix of the observed values of `x`
@@ -431,8 +421,7 @@ def estimate_pdf(
 def estimate_densities_at_quantiles(
     X: np.ndarray, qtiles: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    estimate densities of margins at prespecified quantiles (Silverman rule)
+    """estimate densities of margins at prespecified quantiles (Silverman rule)
     and the joint density at each vector of these quantiles
 
     Args:

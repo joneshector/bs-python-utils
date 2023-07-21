@@ -1058,3 +1058,46 @@ def print_quantiles(
         bs_error_abort("v must be  a vector or a list of vectors")
 
     return cast(np.ndarray, qvals)
+
+
+def set_elements_abovebelow_diagonal(
+    matrix: np.ndarray, scalar: int | float, location: str
+) -> np.ndarray:
+    """
+    Sets all elements of the given matrix above or below the diagonal
+    to the specified scalar value.
+
+    Args:
+        matrix: the input matrix; it must be square
+        scalar: The scalar value to set the elements above or below the diagonal.
+        location: 'above', 'below', 'on_above', 'on_below'.
+
+    Returns:
+        The updated matrix with elements above or below the diagonal set to the scalar value,
+        including the diagonal for the `on_` options.
+    """
+    _ = check_square(matrix, "set_elements_abovebelow_diagonal")
+    # copy the matrix
+    new_matrix = matrix.copy()
+
+    # Get the indices of elements above or below the diagonal
+    if location == "above":
+        row_indices, col_indices = np.triu_indices_from(new_matrix, k=1)
+    elif location == "below":
+        row_indices, col_indices = np.tril_indices_from(new_matrix, k=-1)
+    elif location == "on_above":
+        row_indices, col_indices = np.triu_indices_from(new_matrix, k=0)
+    elif location == "on_below":
+        row_indices, col_indices = np.tril_indices_from(new_matrix, k=0)
+    else:
+        bs_error_abort(
+            f"""
+        location can only be 'above', 'below', 
+        'on_above' or 'on_below', not {location}
+        """
+        )
+
+    # Set the elements above or below the diagonal to the scalar value
+    new_matrix[row_indices, col_indices] = scalar
+
+    return new_matrix
