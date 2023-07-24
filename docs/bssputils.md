@@ -1,3 +1,3 @@
-# `bssputils` module
+# bssputils module
 
 ::: bs_python_utils.bssputils

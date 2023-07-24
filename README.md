@@ -13,7 +13,10 @@ My Python utilities.
 
 ### Release notes
 
-
+#### 0.4.1 (July 23, 2023)
+Only print if verbose in bivariate quantiles.
+#### 0.4 (July 22, 2023)
+Added bivariate quantiles and ranks à la optimal transportation.
 #### 0.3 (July 21, 2023)
 Added in Numpy utils a function to set upper and lower triangle to a scalar;
 and `minimize_free` in `bs_opt`.

@@ -11,34 +11,34 @@ nav:
   - Home: index.md
   - API Reference: 
     - General utilities:
-      - bsutils.md
-      - bs_logging.md
-      - bs_mathstr.md
-      - Timer.md
-      - bs_mem.md
+      - error reporting and other utilities: bsutils.md
+      - logging: bs_logging.md
+      - math strings: bs_mathstr.md
+      - timing routines: Timer.md
+      - memory usage: bs_mem.md
     - Scientific:
-      - bsnputils.md
-      - bssputils.md
-      - chebyshev.md
-      - pandas_utils.md
-      - bsstats.md
-      - sklearn_utils.md
-      - distance_covariances.md
-      - bs_opt.md
-      - bs_sparse_gaussian.md
+      - Numpy: bsnputils.md
+      - Scipy: bssputils.md
+      - numerical interpolation and integration: chebyshev.md
+      - Pandas: pandas_utils.md
+      - statistics: bsstats.md
+      - Sklearn: sklearn_utils.md
+      - nonlinear dependence: distance_covariances.md
+      - optimization: bs_opt.md
+      - sparse integration for functions of Gaussians: bs_sparse_gaussian.md
     - Plotting:
-      - bs_plots.md
-      - bsmplutils.md
-      - bs_seaborn.md
-      - bs_altair.md
+      - general interface: bs_plots.md
+      - Matplotlib: bsmplutils.md
+      - Seaborn: bs_seaborn.md
+      - Altair: bs_altair.md
 plugins:
   - search:
   - mkdocstrings:
       handlers:
         python:
-            setup_commands:
-                - import sys
-                - sys.path.append('../')
+          setup_commands:
+            - import sys
+            - sys.path.append('../')
 
 
 # theme:

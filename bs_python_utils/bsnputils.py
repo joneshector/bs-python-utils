@@ -222,8 +222,7 @@ def inv_ecdf(v: np.ndarray, q: np.ndarray | float) -> np.ndarray | float:
     sorted_v[0] = 2.0 * sorted_v[1] - sorted_v[2]  # added to extend for q < 1/nv
     sorted_v[nv + 1] = sorted_v[nv]  # added to extend for q = 1
     if isinstance(q, float):
-        q = np.array([q])
-        q_floor = floor(nv * q)
+        q_floor = np.array([floor(nv * q)])
         val_q = sorted_v[q_floor] + (nv * q - q_floor) * (
             sorted_v[q_floor + 1] - sorted_v[q_floor]
         )

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bs_python_utils"
-version = "0.3"
+version = "0.4.1"
 description = "my Python utilities"
 authors = ["Bernard Salanie <bsalanie@columbia.edu>"]
 repository = "https://github.com/bsalanie/bs-python-utils"
@@ -19,6 +19,7 @@ seaborn = "^0.12.2"
 scikit-learn = "^1.2.2"
 statsmodels = "^0.13.5"
 vega-datasets = "^0.9.0"
+griffe = "^0.32.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"

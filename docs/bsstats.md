@@ -1,3 +1,3 @@
-# `bsstats` module
+# bsstats module
 
 ::: bs_python_utils.bsstats
