@@ -254,7 +254,7 @@ def solve_for_v_(y: np.ndarray, n_nodes: int = 32, verbose: bool = False) -> np.
 
 def bivariate_quantiles(
     y: np.ndarray, u: np.ndarray, n_nodes: int = 32, verbose: bool = False
-):
+) -> np.ndarray:
     """computes the bivariate quantiles of `y` at the quantiles `u`
 
     Args:
@@ -271,7 +271,9 @@ def bivariate_quantiles(
     return bivariate_quantiles_v(y, u, v)
 
 
-def bivariate_ranks(y: np.ndarray, n_nodes: int = 32, verbose: bool = False):
+def bivariate_ranks(
+    y: np.ndarray, n_nodes: int = 32, verbose: bool = False
+) -> np.ndarray:
     """computes the bivariate ranks of `y`
 
     Args:

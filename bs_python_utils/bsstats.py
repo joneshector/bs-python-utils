@@ -16,7 +16,6 @@ from bs_python_utils.bsnputils import (
     check_matrix,
     check_vector,
     check_vector_or_matrix,
-    make_lexico_grid,
 )
 from bs_python_utils.bssputils import spline_reg
 from bs_python_utils.bsutils import bs_error_abort
@@ -416,37 +415,3 @@ def estimate_pdf(
         if weights is not None:
             f_x *= weights / np.mean(weights)
     return cast(np.ndarray, f_x)
-
-
-def estimate_densities_at_quantiles(
-    X: np.ndarray, qtiles: np.ndarray
-) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """estimate densities of margins at prespecified quantiles (Silverman rule)
-    and the joint density at each vector of these quantiles
-
-    Args:
-        X: `n`-vector or `(n, nx)`-matrix
-        qtiles: vector of `nq` numbers between 0 and 1
-
-    Returns: 
-        if `X` is a matrix, the `({nq}^{nx}, {nx})` matrices of estimated margin densities \
-     and the `{nq}^{nx}` vector of the joint density on the lexicographic grid of quantiles;
-        if `X` is a vector, the `nq`-vector of the density at the quantiles, twice
-    """
-    ndims_X = check_vector_or_matrix(X, "estimate_densities_")
-    if ndims_X == 1:
-        f_X = estimate_pdf(X, np.quantile(X, qtiles))
-        return f_X, f_X
-    else:
-        nx = X.shape[1]
-        nq = qtiles.size
-        f_X_k = np.zeros((nq, nx))
-        nodes_mat = np.zeros((nq, nx))
-        for i_x in range(nx):
-            X_ix = X[:, i_x]
-            nodes_mat[:, i_x] = np.quantile(X_ix, qtiles)
-            f_X_k[:, i_x] = estimate_pdf(X_ix, nodes_mat[:, i_x])
-        f_margins = make_lexico_grid(f_X_k)
-        values_X = make_lexico_grid(nodes_mat)
-        f_X = estimate_pdf(X, values_X)  # joint density
-        return f_margins, f_X, values_X
