@@ -12,8 +12,7 @@ My Python utilities.
 -   **Documentation** <https://bsalanie.github.io/bs-python-utils/>
 
 ### Release notes
-#### 0.4.2 (August 2, 2023)
-Updated the docs.
+
 #### 0.4.1 (July 23, 2023)
 Only print if verbose in bivariate quantiles.
 #### 0.4 (July 22, 2023)

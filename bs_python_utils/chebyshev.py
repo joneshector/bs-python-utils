@@ -169,6 +169,35 @@ def cheb_interp_1d(
     return y_vals, c
 
 
+def cheb_find_root(
+    f: ArrayFunctionOfArray, degree: int, interval: Interval | None = None
+) -> np.ndarray | tuple[np.ndarray, np.ndarray | float | None]:
+    """find the roots of $f(x)=0$ in $[0,1]$; also return the one(s) within the interval, if given
+
+    Args:
+        f: the function
+        degree: the degree of the Chebyshev expansion
+        interval: the interval where we want the root
+
+    Returns:
+        the roots in $[0,1]$;  and the one(s) in `interval`, if specified
+    """
+    interval01 = Interval(0.0, 1.0)
+    coeffs_f = cheb_get_coefficients_1d(f, interval01, degree)
+    roots = cast(np.ndarray, move_from1m1(ncheb.chebroots(coeffs_f), interval01))
+
+    if interval:
+        roots_in_interval = roots[(roots >= interval.x0) & (roots <= interval.x1)]
+        if len(roots_in_interval) == 0:
+            return roots, None
+        elif len(roots_in_interval) == 1:
+            return roots, roots_in_interval[0]
+        else:
+            return roots, roots_in_interval
+    else:
+        return roots
+
+
 def cheb_integrate_from_coeffs_1d(c: np.ndarray, interval: Interval) -> float:
     """integrate a function on an interval using the coefficients of its Chebyshev expansion
 
@@ -397,7 +426,7 @@ def cheb_integrate_from_nodes_2d(
     Returns:
         the value of the integral
 
-    Notes:
+    Warning:
         this is much less precise than `cheb_integrate_from_coeffs_2d`
     """
     Mv = check_vector(vals_at_nodes)
@@ -421,7 +450,7 @@ def cheb_integrate_from_nodes_4d(
     Returns:
         the value of the integral
 
-    Notes:
+    Warning:
         it would be better to have a `cheb_integrate_from_coeffs_4d`
     """
     Mv2 = check_square(vals_at_nodes4d)

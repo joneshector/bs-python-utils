@@ -1,4 +1,4 @@
-from math import exp, isclose
+from math import exp, isclose, sqrt
 
 import numpy as np
 
@@ -9,6 +9,7 @@ from bs_python_utils.chebyshev import (
     Rectangle,
     cheb_eval_fun_at_nodes_1d,
     cheb_eval_fun_at_nodes_2d,
+    cheb_find_root,
     cheb_get_coefficients_1d,
     cheb_get_coefficients_2d,
     cheb_get_nodes_1d,
@@ -25,6 +26,11 @@ from bs_python_utils.chebyshev import (
 
 def fun1d(x: FloatOrArray) -> FloatOrArray:
     return np.exp(-x)
+
+
+def fun1d2(x: FloatOrArray) -> FloatOrArray:
+    # return (x-0.3)*(x-0.5)*(x-0.7)
+    return 8.0 * x * x - 8.0 * x + 1.0
 
 
 def fun2d(xy: np.ndarray) -> np.ndarray | None:
@@ -170,3 +176,25 @@ def test_cheb_integrate_from_nodes_4d():
     val_integral = cheb_integrate_from_nodes_4d(vals_at_nodes4d, weights2d)
     val_integral_th = 1.0 - exp(-1.0)
     assert isclose(val_integral, val_integral_th, abs_tol=1e-3)
+
+
+def test_cheb_find_root():
+    deg, x0, x1 = 2, 0.7, 0.9
+    x_interval = Interval(x0=x0, x1=x1)
+    roots = cheb_find_root(fun1d2, deg)
+    root1 = (1.0 - 1.0 / sqrt(2.0)) / 2.0
+    root2 = (1.0 + 1.0 / sqrt(2.0)) / 2.0
+    roots_th = np.array([root1, root2])
+    assert np.allclose(roots, roots_th)
+    roots_bis, roots7 = cheb_find_root(fun1d2, deg, interval=x_interval)
+    assert np.allclose(roots_bis, roots_th)
+    roots7_th = root2
+    assert isclose(roots7, roots7_th)
+    x_interval2 = Interval(x0=0.1, x1=0.9)
+    roots_ter, roots2 = cheb_find_root(fun1d2, deg, interval=x_interval2)
+    assert np.allclose(roots_ter, roots_th)
+    assert np.allclose(roots2, roots_th)
+    x_interval3 = Interval(x0=0.0, x1=0.1)
+    roots_qua, roots3 = cheb_find_root(fun1d2, deg, interval=x_interval3)
+    assert np.allclose(roots_qua, roots_th)
+    assert roots3 is None
