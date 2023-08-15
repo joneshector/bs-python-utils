@@ -5,7 +5,7 @@ site_description: my Python utilities
 site_author: Bernard Salanie
 edit_uri: edit/main/docs/
 repo_name: bsalanie/bs-python-utils
-copyright: Maintained by <a href="https://bsalanie.com">Bernard Salanie</a>.
+copyright: Maintained by <a href="https://bsalanie.github.io">Bernard Salanie</a>.
 
 nav:
   - Home: index.md
@@ -26,6 +26,7 @@ nav:
       - nonlinear dependence: distance_covariances.md
       - optimization: bs_opt.md
       - sparse integration for functions of Gaussians: bs_sparse_gaussian.md
+      - bivariate quantiles and ranks: bivariate_quantiles.md
     - Plotting:
       - general interface: bs_plots.md
       - Matplotlib: bsmplutils.md

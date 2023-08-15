@@ -4,19 +4,18 @@ Contains some statistical routines.
 
 from dataclasses import dataclass
 from itertools import combinations_with_replacement
-from typing import cast
+from typing import Callable, cast
 
 import numpy as np
 import scipy.linalg as spla
 import scipy.stats as sts
+from emcee import EnsembleSampler
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KernelDensity
 from statsmodels.nonparametric._kernel_base import EstimatorSettings
 from statsmodels.nonparametric.kernel_regression import KernelReg
 
-from bs_python_utils.bsnputils import (
-    check_matrix,
-    check_vector,
-    check_vector_or_matrix,
-)
+from bs_python_utils.bsnputils import check_matrix, check_vector, check_vector_or_matrix
 from bs_python_utils.bssputils import spline_reg
 from bs_python_utils.bsutils import bs_error_abort
 
@@ -415,3 +414,68 @@ def estimate_pdf(
         if weights is not None:
             f_x *= weights / np.mean(weights)
     return cast(np.ndarray, f_x)
+
+
+def emcee_draw(
+    n_samples: int,
+    log_pdf: Callable[[np.ndarray, list], float],
+    p0: np.ndarray,
+    params: list | None = None,
+    n_burn_in: int | None = 100,
+    seed: int | None = 8754,
+) -> np.ndarray:
+    """uses MCMC to draw `n_samples` samples from the log pdf with given parameters
+
+    Args:
+        n_samples: the number of samples to draw
+        log_pdf: the log of the pdf, `log_pdf(x, *params)`;
+            retuns a float from the array for one sample
+        p0: the initial values for the walkers
+        params: a list of parameters
+        n_burn_in: the number of burn-in iterations for MCMC
+        seed: to randomly draw the samples from the walkers
+
+    Returns:
+        an `(n_samples, n_dims)` array of samples.
+
+    Warning:
+        The `log_pdf` function should return minus infinity
+        outside of the support of the pdf, and `p0` should be contained
+        in that support.
+    """
+    n_walkers, n_dims = p0.shape
+    # burn in
+    sampler = EnsembleSampler(n_walkers, n_dims, log_pdf, args=params)
+    state = sampler.run_mcmc(p0, n_burn_in)
+    sampler.reset()
+    # generate the samples
+    sampler.run_mcmc(state, n_samples)
+    samples = sampler.get_chain(flat=True)
+    rng = np.random.default_rng(seed)
+    samples = rng.choice(samples, size=n_samples, replace=False)
+    return cast(np.ndarray, samples)
+
+
+def kde_resample(
+    data: np.ndarray, n_samples: int, n_bw: int = 10
+) -> tuple[np.ndarray, float]:
+    """Fit a nonparametric density to data by KDE, with cross-validation with starting point at rule of thumb,
+    and generate samples from the estimated density.
+
+    Args:
+        fdata: an `(n_obs, n_dims)` matrix of data
+        n_samples: how many iid draws we want
+        n_bw: how mamy bandwidths we try from 1/10th to 10 times the rule-of-thumb
+
+    Returns:
+        an `(n_samples, n_dims)` matrix of draws, and the bandwidth used.
+    """
+    n_obs, n_dims = check_matrix(data)
+    h_rot = np.std(data) * (n_obs ** (-1 / (n_dims + 4)))
+    params = {"bandwidth": h_rot * np.logspace(-1, 1, n_bw)}
+    grid = GridSearchCV(KernelDensity(), params)
+    grid.fit(data)
+    kde = grid.best_estimator_
+    best_bandwidth = grid.best_params_["bandwidth"]
+    resampled_data = kde.sample(n_samples)
+    return resampled_data, best_bandwidth
