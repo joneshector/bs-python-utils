@@ -463,7 +463,7 @@ def kde_resample(
     and generate samples from the estimated density.
 
     Args:
-        fdata: an `(n_obs, n_dims)` matrix of data
+        data: an `(n_obs, n_dims)` matrix of data
         n_samples: how many iid draws we want
         n_bw: how mamy bandwidths we try from 1/10th to 10 times the rule-of-thumb
 
