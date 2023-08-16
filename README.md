@@ -12,6 +12,8 @@ My Python utilities.
 -   **Documentation** <https://bsalanie.github.io/bs-python-utils/>
 
 ### Release notes
+#### 0.5.2 (August 16, 2023)
+Added two interpolation routines from values at the Chebyshev nodes in `chebyshev` module.
 #### 0.5.1 (August 14, 2023)
 Added two functions to draw random samples in  `bsstats` module.
 #### 0.5 (August 7, 2023)

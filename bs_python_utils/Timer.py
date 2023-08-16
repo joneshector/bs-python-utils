@@ -28,20 +28,21 @@ class Timer:
     A timer that can be started, stopped, and reset as needed by the user.
     It keeps track of the total elapsed time in the `elapsed` attribute::
 
-       with Timer() as t:
-         ....
-       print(f"... took {t.elapsed} seconds")
+    Examples:
+       >>> with Timer() as t:
+       >>>  ....
+       >>> print(f"... took {t.elapsed} seconds")
 
     use `Timer(time.process_time)` to get only CPU time.
 
     can also do::
 
-       t = Timer()
-       t.start()
-       t.stop()
-       t.start()   # will add to the same counter
-       t.stop()
-       print(f"{t.elapsed} seconds total")
+       >>> t = Timer()
+       >>> t.start()
+       >>> t.stop()
+       >>> t.start()   # will add to the same counter
+       >>> t.stop()
+       >>> print(f"{t.elapsed} seconds total")
     """
 
     def __init__(self, func: Callable = time.perf_counter) -> None:

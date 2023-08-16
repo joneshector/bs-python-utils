@@ -35,7 +35,7 @@ def memory_usage(n: int | None = 10) -> None:
         n: we report the size of the largest `n` global items
 
     Returns:
-        nothing
+        nothing.
     """
     memory_usage_by_variable = pd.DataFrame(
         {k: sys.getsizeof(v) for (k, v) in globals().items()}, index=["Size"]
@@ -70,11 +70,11 @@ def memory_display_top(
     Returns:
         just prints
 
-    Example:
-       tracemalloc.start()
-       .... execute ...
-       snapshot = tracemalloc.take_snapshot()
-       memory_display_top(snapshot)
+    Examples:
+       >>> tracemalloc.start()
+       >>> .... execute ...
+       >>> snapshot = tracemalloc.take_snapshot()
+       >>> memory_display_top(snapshot)
     """
 
     top_stats = snapshot.statistics(key_type)
@@ -105,25 +105,24 @@ def memory_display_top_diffs(
     limit: int = 5,
 ) -> None:
     """
-    prints out the lines with the top `limit` allocations \
-     between the two snapshots
-    
+    prints out the lines with the top `limit` allocations between the two snapshots
+
     Args:
         snapshot1: previous snapshot
         snapshot2: new snapshot
         key_type: 'lineno' gives file and line number; 'traceback' gives all
         limit: how many top allocations we want
 
-    Returns: 
-        just prints
+    Returns:
+        just prints.
 
-    Example:
-       tracemalloc.start()
-       .... execute ...
-       snapshot1 = tracemalloc.take_snapshot()
-       .... execute ...
-       snapshot2 = tracemalloc.take_snapshot()
-       memory_display_top_diffs(snapshot1, snapshot2)
+    Examples:
+       >>> tracemalloc.start()
+       >>> .... execute ...
+       >>> snapshot1 = tracemalloc.take_snapshot()
+       >>> .... execute ...
+       >>> snapshot2 = tracemalloc.take_snapshot()
+       >>>  memory_display_top_diffs(snapshot1, snapshot2)
 
     """
 

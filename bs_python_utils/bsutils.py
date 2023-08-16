@@ -1,5 +1,8 @@
 """
 Contains various utilities programs.
+
+Note:
+    if the math looks strange in the documentation, just reload the page.
 """
 import sys
 import traceback
@@ -90,23 +93,19 @@ def bs_switch(
     Returns:
         the value for the match, or `default`
 
-    Example:
-        calc_dict = {
+    Examples:
+        >>> calc_dict = {
         "plus": lambda x, y: x + y,
         "minus": lambda x, y: x - y
         }
-
-        plus = bs_switch('plus', calc_dict, default="unintended function")
-        minus = bs_switch('min', calc_dict, strict=False, default="unintended function")
-
-        plus(6, 4)
-        >> 10
-        minus(6, 4)
-        >> 2
-
-        bs_switch('plu', calc_dict)
-        >> "no match""
-
+        >>> plus = bs_switch('plus', calc_dict, default="unintended function")
+        >>> minus = bs_switch('min', calc_dict, strict=False, default="unintended function")
+        >>> plus(6, 4)
+        10
+        >>> minus(6, 4)
+        2
+        >>> bs_switch('plu', calc_dict)
+        "no match"
     """
     if strict:
         for key in dico:
@@ -134,7 +133,7 @@ def find_first(iterable: Iterable, condition: Callable = lambda x: True) -> Any:
 
         Raises `StopIteration` if no item satisfyng the condition is found.
 
-    Example:
+    Examples:
         >>> find_first( (1,2,3), condition=lambda x: x % 2 == 0)
         (1, 2)
         >>> find_first(range(3, 100))

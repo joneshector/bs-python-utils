@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from math import sqrt
 from typing import cast
 
 import numpy as np
@@ -167,6 +168,31 @@ def cheb_interp_1d(
         c = cheb_get_coefficients_1d(fun, interval, degree)
     y_vals = ncheb.chebval(move_to1m1(x_vals, interval), c)
     return y_vals, c
+
+
+def cheb_interp_1d_from_nodes(
+    f_vals_at_nodes: np.ndarray, x: np.ndarray, interval: Interval | None = None
+) -> float:
+    """interpolate $f(x)$ given the values $f(x_m)$ for $m=1,\\ldots,M^2$
+    at the Chebyshev nodes on an intervak
+
+    Args:
+        f_vals_at_nodes: an $M^2$ vector of values $f(x_m)$
+        x: a scalar where we want $f(x)$
+        interval: the interval on which the function acts; by default, $[0,1]$
+
+    Returns:
+        the interpolated value of $f(x)$.
+    """
+    if interval is None:
+        interval = Interval(x0=0.0, x1=1.0)
+    # we need the nodes on $[-1, 1]$
+    interval_1m1 = Interval(x0=-1.0, x1=1.0)
+    degree = f_vals_at_nodes.size
+    nodes1m1, _ = cheb_get_nodes_1d(interval_1m1, degree)
+    coeffs_f = ncheb.chebfit(nodes1m1, f_vals_at_nodes, degree - 1)
+    f_x, _ = cheb_interp_1d(x, interval, c=coeffs_f)
+    return cast(float, f_x)
 
 
 def cheb_find_root(
@@ -391,6 +417,32 @@ def cheb_interp_2d(
             c2[k] = ncheb.chebval(xy_vals1[1], c_k)
         f_vals = ncheb.chebval(xy_vals1[0], c2)
     return f_vals, c
+
+
+def cheb_interp_2d_from_nodes(
+    f_vals_at_nodes: np.ndarray, x: np.ndarray, rectangle: Rectangle | None = None
+) -> float:
+    """interpolate $f(x)$ given the values $f(x_m)$ for $m=1,\\ldots,M^2$
+    at the Chebyshev nodes on a rectangle
+
+    Args:
+        f_vals_at_nodes: an $M^2$ vector of values $f(x_m)$
+        x: a 2-vector where we want $f(x)$
+        rectangle: the rectangle on which the function acts; by default, $[0,1]^2$
+
+    Returns:
+        the interpolated value of $f(x)$.
+
+    """
+    if rectangle is None:
+        interval01 = Interval(x0=0.0, x1=1.0)
+        rectangle = Rectangle(x_interval=interval01, y_interval=interval01)
+    degree = round(sqrt(f_vals_at_nodes.size))
+    coeffs_f = cheb_get_coefficients_2d(
+        rectangle, degree, vals_at_nodes=f_vals_at_nodes
+    )
+    f_x, _ = cheb_interp_2d(x, rectangle, c=coeffs_f)
+    return cast(float, f_x)
 
 
 def cheb_integrate_from_coeffs_2d(c: np.ndarray, rectangle: Rectangle) -> float:

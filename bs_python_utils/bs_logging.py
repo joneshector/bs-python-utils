@@ -24,13 +24,13 @@ def init_logger(
     Returns:
         the logger
 
-    Example:
-        logger_dir = "logs"
-        logger_name = "check_log"
-        logger = init_logger(logger_name, save_dir=logger_dir)
-        logger = get_logger(logger_name)
+    Examples:
+        >>> logger_dir = "logs"
+        >>> logger_name = "check_log"
+        >>> logger = init_logger(logger_name, save_dir=logger_dir)
+        >>> logger = get_logger(logger_name)
 
-        will create two logs:
+        This will create two logs:
 
         * one  printed to console where we run the code (the `StreamHandler`),
         * and one that will be saved to file `save_dir/logger_name.txt` (the `FileHandler`).
@@ -39,11 +39,12 @@ def init_logger(
 
         We use the `Formatter` class to define the format of the logs.
         Here:
+
         * The time of the log in a human-readable format, `asctime`
         * `levelname` is the level of the log, one out of `INFO, DEBUG, WARNING, ERROR, CRITICAL`.
         * The name of the file, `filename`, from which the log was generated,
         and the line number, `lineno`.
-        *  Lastly,  the message itself — `message`.
+        * Lastly,  the message itself — `message`.
 
         The default has only `INFO` logs and above (i.e., also `WARNING, ERROR` and `CRITICAL`)
         displayed in the console; the file will also include `DEBUG` logs.
@@ -73,8 +74,8 @@ def init_logger(
 
 
 def log_execution(func: Callable) -> Callable:
-    """Decorator to log the execution of a function
-    Only records entry to and exit from the function, to the console
+    """Decorator to log the execution of a function.
+    Only records entry to and exit from the function, to the console.
     """
     loglevel = logging.info
 
@@ -95,6 +96,6 @@ def get_logger(logger_name: str) -> logging.Logger:
         logger_name: name you want for the logger
 
     Returns:
-        the logger
+        the logger.
     """
     return logging.getLogger(logger_name)

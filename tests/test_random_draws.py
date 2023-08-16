@@ -27,6 +27,6 @@ def test_kde_resample():
     n_obs, n_dims = 10_000, 2
     rng = np.random.default_rng()
     x = rng.normal(size=(n_obs, n_dims))
-    samples, _ = kde_resample(x, 1_000)
+    samples, _ = kde_resample(x, 10_000)
     assert np.allclose(np.mean(samples, 0), np.mean(x, 0), atol=0.1)
     assert np.allclose(np.var(samples, 0), np.var(x, 0), atol=0.1)

@@ -1,5 +1,8 @@
 """
 Contains various `numpy` utility programs.
+
+Note:
+    if the math looks strange in the documentation, just reload the page.
 """
 
 import sys
@@ -170,9 +173,9 @@ def generate_RNG_streams(
     Returns:
         `nsim` streams
 
-    Example:
-        streams = generate_RNG_streams(10, 575856896)
-        x = streams[i].normal(scale=s, size=(nmarkets, nproducts))
+    Examples:
+        >>> streams = generate_RNG_streams(10, 575856896)
+        >>> x = streams[i].normal(scale=s, size=(nmarkets, nproducts))
     """
     ss = np.random.SeedSequence(initial_seed)
     # Spawn off child SeedSequences to pass to child processes.
@@ -609,7 +612,18 @@ def bsgrid(v: np.ndarray, w: np.ndarray) -> np.ndarray:
         w: basis vector, size n
 
     Returns:
-        an array of shape `(m n, 2)`
+        an array of shape `(m n,2)`.
+
+    Examples:
+        >>> v = np.array([1,2,3])
+        >>> w = np.array([4,5])
+        >>> bsgrid(v, w)
+        array([[1, 4],
+        [1, 5],
+        [2, 4],
+        [2, 5],
+        [3, 4],
+        [3, 5]])
     """
     m = check_vector(v)
     n = check_vector(w)

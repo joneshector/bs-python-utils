@@ -20,7 +20,9 @@ from bs_python_utils.chebyshev import (
     cheb_integrate_from_nodes_2d,
     cheb_integrate_from_nodes_4d,
     cheb_interp_1d,
+    cheb_interp_1d_from_nodes,
     cheb_interp_2d,
+    cheb_interp_2d_from_nodes,
 )
 
 
@@ -82,6 +84,21 @@ def test_cheb_interp_1d():
     assert np.allclose(y_vals2, y_vals_th)
 
 
+def test_interp_1d_from_nodes():
+    deg, x0, x1 = 8, 0.0, 1.0
+    interval = Interval(x0=x0, x1=x1)
+    nodes, _ = cheb_get_nodes_1d(interval, deg)
+    m_vals = set(range(deg))
+    f_vals = np.zeros(deg)
+    for m in m_vals:
+        f_vals[m] = fun1d(nodes[m])
+    x = 0.6
+    val = cheb_interp_1d_from_nodes(f_vals, x)
+    val_th = fun1d(x)
+    print(f"{val=} and {val_th=}")
+    assert isclose(val, val_th)
+
+
 def test_cheb_integrate_from_coeffs_1d():
     deg, x0, x1 = 8, 0.0, 1.0
     interval = Interval(x0=x0, x1=x1)
@@ -141,6 +158,23 @@ def test_cheb_interp_2d():
     f_vals2, c3 = cheb_interp_2d(xy_vals, rectangle, fun=fun2d, degree=deg)
     assert np.allclose(c3, c)
     assert np.allclose(f_vals2, f_vals_th, atol=1e-3)
+
+
+def test_interp_2d_from_nodes():
+    deg, x0, x1, y0, y1 = 16, 0.0, 1.0, 0.0, 1.0
+    x_interval = Interval(x0=x0, x1=x1)
+    y_interval = Interval(x0=y0, x1=y1)
+    rectangle = Rectangle(x_interval=x_interval, y_interval=y_interval)
+    nodes, _ = cheb_get_nodes_2d(rectangle, deg)
+    m_vals = set(range(deg * deg))
+    f_vals = np.zeros(deg * deg)
+    for m in m_vals:
+        f_vals[m] = fun2d(nodes[m])
+    x = np.array([0.3, 0.6])
+    val = cheb_interp_2d_from_nodes(f_vals, x, rectangle)
+    val_th = fun2d(x)
+    print(f"{val=} and {val_th=}")
+    assert isclose(val, val_th)
 
 
 def test_cheb_integrate_from_coeffs_2d():
