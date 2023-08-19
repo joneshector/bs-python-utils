@@ -1,32 +1,23 @@
 """Some useful strings for math formulae.
 
+Note:
+    if the math looks strange in the documentation, just reload the page.
+
 Attributes:
-    str_beta0 (str): the LaTeX string `\\beta_0`
-
-    str_beta1 (str): the LaTeX string `\\beta_1`
-
-    str_pi (str): the LaTeX string `\\pi`
-
-    str_sigma (str): the LaTeX string `\\sigma`
-
-    str_sigma2 (str): the LaTeX string `\\sigma^2`
-
-    uni_beta0 (str): the Unicode string `\\beta_0`
-
-    uni_beta1 (str): the Unicode string `\\beta_1`
-
-    uni_pi (str): the Unicode string `\\pi`
-
-    uni_sigma (str): the Unicode string `\\sigma`
-
-    uni_sigma2 (str): the Unicode string `\\sigma^2`
-
-    uni_s2 (str): the Unicode string `s^2`
-
-    uni_R2 (str): the Unicode string `R^2`
-
-    sub_sub_scripts (dict): a dictionary of Unicodes for subscripts and superscripts;
-        e.g `a^b` would be `"a" + sub_sup_scripts['b'][0]`
+    * str_beta0: the LaTeX string $\\beta_0$
+    * str_beta1: the LaTeX string $\\beta_1$
+    * str_pi: the LaTeX string $\\pi$
+    * str_sigma: the LaTeX string $\\sigma$
+    * str_sigma2: the LaTeX string $\\sigma^2$
+    * uni_beta0: the Unicode string $\\beta_0$
+    * uni_beta1: the Unicode string $\\beta_1$
+    * uni_pi: the Unicode string $\\pi$
+    * uni_sigma: the Unicode string $\\sigma$
+    * uni_sigma2: the Unicode string $\\sigma^2$
+    * uni_s2: the Unicode string $s^2$
+    * uni_R2: the Unicode string $R^2$
+    * sub_sub_scripts: a dictionary of unicodes for subscripts and superscripts;
+        e.g $a^b$ would be `"a" + sub_sup_scripts['b'][0]`
 """
 
 #  LaTeX strings
@@ -36,7 +27,7 @@ str_pi = r"$\pi$"
 str_sigma = r"$\sigma$"
 str_sigma2 = r"$\sigma^2$"
 
-# Unicode
+# * unicode
 uni_beta0 = "\N{GREEK SMALL LETTER BETA}\N{SUBSCRIPT ZERO}"
 uni_beta1 = "\N{GREEK SMALL LETTER BETA}\N{SUBSCRIPT ONE}"
 uni_pi = "\N{GREEK SMALL LETTER PI}"
@@ -49,9 +40,9 @@ uni_R2 = "R\N{SUPERSCRIPT TWO}"
 sub_sup_scripts = {
     #           superscript     subscript
     "0": ("\u2070", "\u2080"),
-    "1": ("\u00B9", "\u2081"),
-    "2": ("\u00B2", "\u2082"),
-    "3": ("\u00B3", "\u2083"),
+    "1": ("\u00b9", "\u2081"),
+    "2": ("\u00b2", "\u2082"),
+    "3": ("\u00b3", "\u2083"),
     "4": ("\u2074", "\u2084"),
     "5": ("\u2075", "\u2085"),
     "6": ("\u2076", "\u2086"),
@@ -110,11 +101,11 @@ sub_sup_scripts = {
     "X": ("?", "?"),
     "Y": ("?", "?"),
     "Z": ("?", "?"),
-    "+": ("\u207A", "\u208A"),
-    "-": ("\u207B", "\u208B"),
-    "=": ("\u207C", "\u208C"),
-    "(": ("\u207D", "\u208D"),
-    ")": ("\u207E", "\u208E"),
+    "+": ("\u207a", "\u208a"),
+    "-": ("\u207b", "\u208b"),
+    "=": ("\u207c", "\u208c"),
+    "(": ("\u207d", "\u208d"),
+    ")": ("\u207e", "\u208e"),
     ":alpha": ("\u1d45", "?"),
     ":beta": ("\u1d5d", "\u1d66"),
     ":gamma": ("\u1d5e", "\u1d67"),

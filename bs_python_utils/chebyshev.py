@@ -1,3 +1,25 @@
+""" Chebyshev interpolation and integration in 1, 2, and 4 dimensions
+
+Note:
+    if the math looks strange in the documentation, just reload the page.
+
+* `Interval`, `Rectangle`: basic classes to define the integration domain
+* `move_from1m1, move_to1m1`: rescale to and from the $[-1,1]$ interval
+* `cheb_get_nodes_1d`: get Chebyshev nodes and weights on an interval 
+* `cheb_eval_fun_at_nodes_1d`: evaluates a function at is nodes on an interval
+* `cheb_get_coefficients_1d`: get the Chebyshev coefficients for a function
+* `cheb_interp_1d`: interpolate a function on an interval given its definition or its coefficients
+* `cheb_interp_1d_from_nodes`: interpolate a function on an interval given its values at the nodes
+* `cheb_find_root`: finds the roots of a function in an interval
+* `cheb_integrate_from_coeffs_1d`: integrates a function given its coefficients
+* `cheb_integrate_from_nodes_1d`: integrates a function given its values at the nodes (less precise)
+* `cheb_get_nodes_2d`: get Chebyshev nodes and weights on a rectangle
+* `cheb_eval_fun_at_nodes_2d`: evaluates a function at is nodes on a rectangle
+* `cheb_get_coefficients_2d`: get the Chebyshev coefficients for a function of 2 arguments
+* `cheb_interp_2d`: interpolate a function on a rectangle given its definition or its coefficients
+* `cheb_interp_2d_from_nodes`: interpolate a function on a rectangle given its values at the nodes
+* `cheb_integrate_from_nodes_4d`: integrate over a product of rectangles given values at the tensor products of the 2d nodes.
+"""
 from dataclasses import dataclass
 from math import sqrt
 from typing import cast

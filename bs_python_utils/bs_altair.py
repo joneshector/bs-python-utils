@@ -1,4 +1,14 @@
-""" a personal library of Altair plots
+""" Some Altair plots.
+
+* `alt_lineplot`, `alt_superposed_lineplot`, `alt_superposed_faceted_lineplot`
+* `alt_plot_fun`: plots a function
+* `alt_density`, `alt_faceted_densities`: plots the density of `x`, or of `x` conditional on a category
+* `alt_scatterplot`, `alt_scatterplot_with_histo`, `alt-linked_scatterplots`: variants of scatter plots
+* `alt_histogram_by`, `alt_histogram_continuous`: histograms of `x` by `y`, and of a continuous `x`
+* `alt_stacked_area`,`alt_stacked_area_facets`: stacked area plots
+* `plot_parameterized_estimates`: plots densities of estimates of coefficients, with the true values,  as a function of a parameter
+* `plot_true_sim_facets, plot_true_sim2_facets`:  plot two simulated values and  the true values of statistics as a function of a parameter
+* `alt_tick_plots`: vertically arranged tick plots of variables.
 """
 
 from typing import Callable, cast
@@ -41,7 +51,7 @@ def alt_scatterplot(
     selection: bool = False,
 ) -> alt.Chart:
     """
-    scatterplot of `df[str_x]` vs `df[str_y]`
+    Scatterplot of `df[str_x]` vs `df[str_y]`.
 
     Args:
         df: the data with columns for x, y
@@ -58,7 +68,7 @@ def alt_scatterplot(
         aggreg: the name of an aggregating function for `y`
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     type_x = "T" if time_series else "Q"
     var_x = alt.X(f"{str_x}:{type_x}")
@@ -125,7 +135,7 @@ def alt_lineplot(
     **kwargs,
 ) -> alt.Chart:
     """
-    scatterplot of `df[str_x]` vs `df[str_y]`
+    Scatterplot of `df[str_x]` vs `df[str_y]`
 
     Args:
         df: the data with columns `str_x` and `str_y`
@@ -136,7 +146,7 @@ def alt_lineplot(
         aggreg: the name of an aggregating function for `y`
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     type_x = "T" if time_series else "Q"
     var_y = f"{aggreg}({str_y}):Q" if aggreg is not None else str_y
@@ -156,7 +166,7 @@ def alt_plot_fun(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    plots the function `f` from `start` to `end`
+    Plots the function `f` from `start` to `end`.
 
     Args:
         f: returns a Numpy array from a Numpy array
@@ -166,7 +176,7 @@ def alt_plot_fun(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     step = (end - start) / npoints
     points = np.arange(start, end + step, step)
@@ -186,7 +196,7 @@ def alt_plot_fun(
 
 
 def alt_density(df: pd.DataFrame, str_x: str, save: str | None = None) -> alt.Chart:
-    """plots the density of `df[str_x]`
+    """Plots the density of `df[str_x]`.
 
     Args:
         df: the data with the `str_x` variable
@@ -194,7 +204,7 @@ def alt_density(df: pd.DataFrame, str_x: str, save: str | None = None) -> alt.Ch
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     ch = (
         alt.Chart(df)
@@ -222,7 +232,7 @@ def alt_linked_scatterplots(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    two scatterplots: of `df[str_x1]` vs `df[str_y]` and of `df[str_x2]` vs `df[str_y]`,
+    Creates two scatterplots: of `df[str_x1]` vs `df[str_y]` and of `df[str_x2]` vs `df[str_y]`,
     both with color as per `df[str_f]`. Selecting an interval in one shows up in the other.
 
     Args:
@@ -234,7 +244,7 @@ def alt_linked_scatterplots(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-          the `alt.Chart` object
+          the `alt.Chart` object.
     """
     interval = alt.selection_interval()
 
@@ -257,8 +267,8 @@ def alt_scatterplot_with_histo(
     df: pd.DataFrame, str_x: str, str_y: str, str_f: str, save: str | None = None
 ) -> alt.Chart:
     """
-    scatterplots  `df[str_x]` vs `df[str_y]` with colors as per `df[str_f]`
-    allows to select an interval and histograns the counts of `df[str_f]` in the interval
+    Scatterplot of `df[str_x]` vs `df[str_y]` with colors as per `df[str_f]`
+    allows to select an interval and histograns the counts of `df[str_f]` in the interval.
 
     Args:
         df: the data with the `str_x` and `str_f` variables
@@ -268,7 +278,7 @@ def alt_scatterplot_with_histo(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-          the `alt.Chart` object
+          the `alt.Chart` object.
     """
     interval = alt.selection_interval()
 
@@ -309,7 +319,7 @@ def alt_faceted_densities(
     max_cols: int | None = 4,
 ) -> alt.Chart:
     """
-    plots the density of `df[str_x]` by `df[str_f]` in column facets
+    Plots the density of `df[str_x]` by `df[str_f]` in column facets
 
     Args:
         df: the data with the `str_x` and `str_f` variables
@@ -320,7 +330,7 @@ def alt_faceted_densities(
         max_cols: we wrap after that number of columns
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     our_legend_title = str_f if legend_title is None else legend_title
     ch = (
@@ -353,7 +363,7 @@ def alt_superposed_lineplot(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    plots `df[str_x]` vs `df[str_y]` by `df[str_f]` on one plot
+    Plots `df[str_x]` vs `df[str_y]` by `df[str_f]` on one plot
 
     Args:
         df: the data with the `str_x`, `str_y`, and `str_f` variables
@@ -365,7 +375,7 @@ def alt_superposed_lineplot(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     type_x = "T" if time_series else "Q"
     our_legend_title = str_f if legend_title is None else legend_title
@@ -394,7 +404,7 @@ def alt_superposed_faceted_lineplot(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    plots `df[str_x]` vs `df[str_y]` superposed by `df[str_f]` and faceted by `df[str_g]`
+    Plots `df[str_x]` vs `df[str_y]` superposed by `df[str_f]` and faceted by `df[str_g]`
 
     Args:
         df: the data with the `str_x`, `str_y`, and `str_f` variables
@@ -409,7 +419,7 @@ def alt_superposed_faceted_lineplot(
 
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     type_x = "T" if time_series else "Q"
     our_title = str_f if legend_title is None else legend_title
@@ -435,7 +445,7 @@ def alt_histogram_by(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    plots a histogram of a statistic of `str_y` by `str_x`
+    Plots a histogram of a statistic of `str_y` by `str_x`
 
     Args:
         df: a dataframe with columns `str_x` and `str_y`
@@ -445,7 +455,7 @@ def alt_histogram_by(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the Altair chart
+        the Altair chart.
     """
     ch = (
         alt.Chart(df)
@@ -461,7 +471,7 @@ def alt_histogram_continuous(
     df: pd.DataFrame, str_x: str, save: str | None = None
 ) -> alt.Chart:
     """
-    histogram of a continuous variable `df[str_x]`
+    Histogram of a continuous variable `df[str_x]`
 
     Args:
         df: the data with the `str_x`, `str_y`, and `str_f` variables
@@ -469,7 +479,7 @@ def alt_histogram_continuous(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     ch = alt.Chart(df).mark_bar().encode(alt.X(str_x, bin=True), y="count()")
     _maybe_save(ch, save)
@@ -486,7 +496,7 @@ def alt_stacked_area(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    normalized stacked lineplots of `df[str_x]` vs `df[str_y]` by `df[str_f]`
+    Normalized stacked lineplots of `df[str_x]` vs `df[str_y]` by `df[str_f]`
 
     Args:
         df: the data with columns for `str_x`, `str_y`, and `str_f`
@@ -498,7 +508,7 @@ def alt_stacked_area(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     type_x = "T" if time_series else "Q"
     ch = (
@@ -529,7 +539,7 @@ def alt_stacked_area_facets(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    normalized stacked lineplots of `df[str_x]` vs `df[str_y]` by `df[str_f]`, faceted by `df[str_g]`
+    Normalized stacked lineplots of `df[str_x]` vs `df[str_y]` by `df[str_f]`, faceted by `df[str_g]`
 
     Args:
         df: the data with columns for `str_x`, `str_y`, and `str_f`
@@ -542,7 +552,7 @@ def alt_stacked_area_facets(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     type_x = "T" if time_series else "Q"
     ch = (
@@ -609,7 +619,7 @@ def plot_parameterized_estimates(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    plots estimates of coefficients, with the true values,  as a function of a parameter; one facet per coefficient
+    Plots estimates of coefficients, with the true values,  as a function of a parameter; one facet per coefficient
 
     Args:
         parameter_name: the name of the parameter
@@ -622,7 +632,7 @@ def plot_parameterized_estimates(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     n_vals = check_vector(parameter_values)
     n_coeffs = 1 if isinstance(coeff_names, str) else len(coeff_names)
@@ -713,7 +723,7 @@ def plot_true_sim_facets(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    plots simulated and true values of statistics as a function of a parameter; one facet per coefficient
+    Plots simulated and true values of statistics as a function of a parameter; one facet per coefficient
 
     Args:
         parameter_name: the name of the parameter
@@ -728,7 +738,7 @@ def plot_true_sim_facets(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     n_stats = len(stat_names)
     nvals = check_vector(parameter_values, "plot_true_sim_facets")
@@ -810,7 +820,7 @@ def plot_true_sim2_facets(
     save: str | None = None,
 ) -> alt.Chart:
     """
-    plots simulated values for two methods and true values of statistics as a function of a parameter;
+    Plots simulated values for two methods and true values of statistics as a function of a parameter;
     one facet per coefficient
 
     Args:
@@ -827,7 +837,7 @@ def plot_true_sim2_facets(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     n_stats = len(stat_names)
     nvals = check_vector(parameter_values, "plot_true_sim2_facets")
@@ -900,7 +910,7 @@ def alt_tick_plots(
     df: pd.DataFrame, list_vars: str | list[str], save: str | None = None
 ) -> alt.Chart:
     """
-    ticks plot the `df` variables in `list_vars`, arranged vertically
+    Creates a tick plot of the variables in `list_vars` of`df`, arranged vertically.
 
     Args:
         df: a dataframe with the variables in `list_vars`
@@ -908,7 +918,7 @@ def alt_tick_plots(
         save: the name of a file to save to (HTML extension will be added)
 
     Returns:
-        the `alt.Chart` object
+        the `alt.Chart` object.
     """
     if isinstance(list_vars, str):
         varname = list_vars

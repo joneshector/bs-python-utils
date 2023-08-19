@@ -3,6 +3,27 @@ Contains various `numpy` utility programs.
 
 Note:
     if the math looks strange in the documentation, just reload the page.
+
+* `BivariatePolynomial`: a minimal class for bivariate polynomials
+* `outer_bivar`: make a `BivariatePolynomial` from two `Polynomial` objects
+* `check_vector`, `check_matrix`, `check_vector_or_matrix`, `check_square`, `check_tensor`: check an array and return its shape
+* `grid_function`: apply a function on a lattice grid
+* `generate_RNG_streams`: generate a number of random number streams (for parallelizations)
+* `ecdf, inv_ecdf`: the empirical cdf of a sample and its inverse
+* `nprepeat_col, nprepeat_row`: repeat a column or a row
+* `npmaxabs`: maximum absolute value of the elements of an array
+* `rice_stderr`: the Rice local standard errors of a random variable
+* `bs_sqrt_pdmatrix`: square root of a posuitve definite matrix
+* `nplog`, `npexp, npxlogx`: $C^2$ extensions of `np.log`, `np.exp`, and $x\\log x$, with first two derivatives
+* `nppow`: $a^b$ for arrays, with first two derivatives
+* `nppad_beg_zeros`, `nppad_end_zeros`, `nppad2_end_zeros`: pad the beginning or the end of an array with 0
+* `bsgrid, make_lexico_grid`:  construct grid arrays
+* `gauleg, gauher`: nodes and weights of Gauss-Legendre and Gauss-Hermite polynomials
+* `gaussian_expectation`: uses Gauss-Hermite to compute $Ef(X)$ for $X=N(0,1)$
+* `legendre_polynomials`: evaluates the Legendre polynomials
+* `quantile_transform`: returns the quantiles of values in an array
+* `print_quantiles`: prints requested quantiles of an array
+* `set_elements_abovebelow_diagonal`: sets all elements of the given matrix above or below the diagonal to a specified scalar value.
 """
 
 import sys
@@ -37,7 +58,7 @@ def check_vector(v: Any, fun_name: str = None) -> int:
         fun_name: name of the calling function
 
     Returns:
-        the size if successful
+        the size if successful.
     """
     fun_str = ["" if fun_name is None else fun_name + ":"]
     if not isinstance(v, np.ndarray):
@@ -142,7 +163,7 @@ def grid_function(
     x_points: np.ndarray,
     y_points: np.ndarray,
 ) -> np.ndarray:
-    """apply a function f(x, y) on a lattice grid
+    """apply a function `f(x, y)` on a lattice grid
 
     Args:
         fun: should return a matrix `(m, n)`  when called with two matrices `(m, n)`
@@ -164,7 +185,7 @@ def generate_RNG_streams(
     nsim: int, initial_seed: int = 13091962
 ) -> list[np.random.Generator]:
     """
-    return `nsim` RNGs
+    return `nsim` random number generators
 
     Args:
         nsim:  number of RNGs we want
@@ -633,35 +654,15 @@ def bsgrid(v: np.ndarray, w: np.ndarray) -> np.ndarray:
     return np.column_stack((v1, v2))
 
 
-def bs_sqrt_pdmatrix(m: np.ndarray) -> np.ndarray:
-    """
-    square root of a positive definite matrix
-
-    Args:
-        m: a positive definite matrix
-
-    Returns:
-        the square root of the matrix
-    """
-    _ = check_square(m, "bs_sqrt_pdmatrix")
-    eigval, eigvec = np.linalg.eigh(m)
-    eigval = np.maximum(eigval, 0.0)
-    eigval_sqrt = np.sqrt(eigval)
-    eigval_sqrt_diag = np.diag(eigval_sqrt)
-    res = eigvec @ eigval_sqrt_diag @ eigvec.T
-    return cast(np.ndarray, res)
-
-
 def make_lexico_grid(arr: np.ndarray) -> np.ndarray:
     """
-    make a lexicographic grid
+    make a lexicographic grid; it is a generalization of `bsgrid` for $n_c\neq 2$.
 
     Args:
-        arr: `nr`-vector or `(nr,nc)` matrix; `nc` must be 1, 2 or 3
+        arr: an $n_r$-vector or an $(n_r,n_c)$ matrix; $n_c$` must be 1, 2 or 3
 
     Returns:
-        `arr` if it is a vector; otherwise a matrix `({nr}^{nc}, {nc})`
-            for `nc=2`  it is like `bsgrid`
+        `arr` if it is a vector; otherwise a matrix $(n_r^{n_c}, n_c)$.
     """
     ndims_arr = check_vector_or_matrix(arr, "make_lexico_grid`")
     if ndims_arr == 1:
@@ -685,22 +686,37 @@ def make_lexico_grid(arr: np.ndarray) -> np.ndarray:
             return arr  # for mypy
 
 
+def bs_sqrt_pdmatrix(m: np.ndarray) -> np.ndarray:
+    """
+    square root of a positive definite matrix
+
+    Args:
+        m: a positive definite matrix
+
+    Returns:
+        the square root of the matrix.
+    """
+    _ = check_square(m, "bs_sqrt_pdmatrix")
+    eigval, eigvec = np.linalg.eigh(m)
+    eigval = np.maximum(eigval, 0.0)
+    eigval_sqrt = np.sqrt(eigval)
+    eigval_sqrt_diag = np.diag(eigval_sqrt)
+    res = eigvec @ eigval_sqrt_diag @ eigvec.T
+    return cast(np.ndarray, res)
+
+
 class BivariatePolynomial:
     """
-    a class for bivariate polynomials as a list of `Polynomial` objects
+    A class for bivariate polynomials as a list of `Polynomial` objects, with a minimal interface:
 
-    minimal interface:
-
-        * construct from matrix of coefficients
-        * add, subtract, multiply (with constant and with :class:`BivariatePolynomial`)
-        * evaluate  p(x, y) when x, y are at most vectors (and have the same shape if both vectors)
+    * construct from a matrix of coefficients
+    * add, subtract, multiply (with a constant and with a `BivariatePolynomial`)
+    * evaluate $p(x, y)$ when x, y are at most vectors (and have the same shape if both vectors)
     """
 
     def __init__(self, coeffs: np.ndarray):
         """
-        constructor for :class:`BivariatePolynomial`
-
-        coeffs: a two-dimensional array `(deg1+1, deg2+2)`
+        coeffs: a `(deg1+1, deg2+2)` matrix
         """
         self.deg1, self.deg2 = coeffs.shape[0] - 1, coeffs.shape[1] - 1
         self.coef = coeffs
@@ -992,7 +1008,7 @@ def legendre_polynomials(
     b: float = 1.0,
     no_constant: bool = False,
 ) -> np.ndarray:
-    """evaluates the Legendre polynomials over x in the interval [a, b]
+    """evaluates the Legendre polynomials over `x` in the interval $[a, b]$
 
     Args:
         x: the points where the polynomials are to be evaluated
@@ -1002,7 +1018,7 @@ def legendre_polynomials(
         no_constant: if True, delete the constant polynomial
 
     Returns:
-        an array of (max_deg+1) arrays of the shape of x
+        an array of `(max_deg+1)` arrays of the shape of `x`.
     """
     sx = check_vector(x)
     if a > np.min(x):

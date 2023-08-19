@@ -1,7 +1,9 @@
 """
-Cntains various `scikit-learn` utility programs.
-"""
+Contains Lasso `scikit-learn` utility programs:
 
+* `skl_npreg_lasso`: Lasso regression on polynomial interactions of the covariates
+* `plot_lasso_path`: plots the Lasso coefficient paths.
+"""
 from itertools import cycle
 from typing import cast
 
@@ -50,7 +52,7 @@ def plot_lasso_path(y: np.ndarray, X: np.ndarray, eps: float = 1e-3) -> None:
         eps: length of path
 
     Returns:
-        plots the paths
+        plots the paths.
     """
     # Compute paths
     print("Computing regularization path using the lasso...")

@@ -19,7 +19,7 @@ nav:
     - Scientific:
       - Numpy: bsnputils.md
       - Scipy: bssputils.md
-      - numerical interpolation and integration: chebyshev.md
+      - Chebyshev interpolation and integration: chebyshev.md
       - Pandas: pandas_utils.md
       - statistics: bsstats.md
       - Sklearn: sklearn_utils.md
@@ -28,7 +28,7 @@ nav:
       - sparse integration for functions of Gaussians: bs_sparse_gaussian.md
       - bivariate quantiles and ranks: bivariate_quantiles.md
     - Plotting:
-      - general interface: bs_plots.md
+      - plotting interface: bs_plots.md
       - Matplotlib: bsmplutils.md
       - Seaborn: bs_seaborn.md
       - Altair: bs_altair.md
@@ -47,14 +47,17 @@ plugins:
 #     scheme: preference
 
 
+# to navigate with `/site` content correctly
+use_directory_urls: false
 
 theme:
   name: material
   features:
-    - navigation.instant
     - search.highlight
+    - navigation.instant
     - navigation.expand
     - navigation.tabs
+    - navigation.indexed
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default

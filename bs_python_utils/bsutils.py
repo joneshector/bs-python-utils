@@ -1,5 +1,18 @@
 """
-Contains various utilities programs.
+Contains various utilities programs:
+
+* `printargs`: a decorator that reports the arguments of the function it decorates
+* `bs_name_func`: returns the name of the current function or its callers
+* `bs_error_abort`: reports on error and aborts execution
+* `final_s`: whether a word should have a final 's'
+* `bs_switch`: an improved `switch` statement
+* `find_first`: returns the index of and the first item in an iterable that satisfies a condition
+* `print_stars`: prints a title within lines of stars
+* `file_print_stars`: does the same, to a file
+* `mkdir_if_needed`: creates a directory if it does not exist
+* `bscomb`: a combination ${n \\choose k}$ operator
+* `bslog, bsxlogx, bsexp`: $C^2$ extensions of $\\log(x), x\\log x, \\exp(x)$, and their first two derivatives
+* `bs_projection_point`: projects a point on a line in the plane.
 
 Note:
     if the math looks strange in the documentation, just reload the page.
@@ -221,7 +234,7 @@ def bscomb(n: int, k: int) -> int:
         k: should be smaller than n
 
     Returns:
-        `{n \\choose k}`
+        `{n \\choose k}`.
     """
     if not isinstance(n, int):
         bs_error_abort(f"n should be an integer, not {n}")

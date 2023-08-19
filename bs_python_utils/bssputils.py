@@ -1,5 +1,8 @@
 """
-Contains various `scipy` utility programs.
+Contains `scipy` utility programs:
+
+* `describe_array`: report descriptive statistics on a vectorized array
+* `spline_reg`: spline interpolation in one dimension.
 """
 from math import sqrt
 from typing import Any, cast
@@ -41,7 +44,7 @@ def spline_reg(
     smooth: bool | None = True,
 ) -> np.ndarray:
     """
-    one-dimensional spline interpolation of vector y on vector x
+    one-dimensional spline interpolation of vector `y` on vector `x`
 
     Args:
         y: vector of y-values
@@ -51,7 +54,7 @@ def spline_reg(
         smooth: True if we want a smoother; otherwise we go through all points provided
 
     Returns:
-        values interpolated at `x_new`
+        values interpolated at `x_new`.
     """
     n = check_vector(x)
     ny = check_vector(y)

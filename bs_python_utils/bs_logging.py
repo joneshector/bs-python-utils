@@ -1,4 +1,7 @@
-""" Utilities for logging
+""" Utilities for logging:
+
+* `init_logger` initializes and returns a customized logger
+* `log_execution` ia a decorator to log entry into and ext from a function.
 """
 import functools
 import logging
@@ -28,7 +31,6 @@ def init_logger(
         >>> logger_dir = "logs"
         >>> logger_name = "check_log"
         >>> logger = init_logger(logger_name, save_dir=logger_dir)
-        >>> logger = get_logger(logger_name)
 
         This will create two logs:
 
@@ -87,15 +89,3 @@ def log_execution(func: Callable) -> Callable:
         return result
 
     return wrapper
-
-
-def get_logger(logger_name: str) -> logging.Logger:
-    """Get a logger
-
-    Args:
-        logger_name: name you want for the logger
-
-    Returns:
-        the logger.
-    """
-    return logging.getLogger(logger_name)

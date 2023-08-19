@@ -1,4 +1,10 @@
-"""Utility functions for pandas """
+"""Utility functions for pandas:
+
+* `bspd_print`: pretty-prints a data frame
+* `bspd_cross_products`: generates cross-products of variables
+* `bspd_statsdf`: makes a dataframe with columns from an array specified column names.
+* `bspd_prepareplot`: prepares a dataframe for plotting (very specific). 
+"""
 
 from itertools import product
 
@@ -123,7 +129,7 @@ def bspd_statsdf(
     col_names: str | list[str] | list[str | list[str]],
 ) -> pd.DataFrame:
     """
-    make a dataframe with columns from the array(s) in T and names from col_names
+    Make a dataframe with columns from the array(s) in `T` and names from `col_names`.
 
     Args:
         T: a list of n_T matrices or vectors with N rows, or a matrix or a vector with N rows
@@ -131,7 +137,7 @@ def bspd_statsdf(
             with the names for the column(s) of the corresponding T matrix
 
     Returns:
-        a dataframe with the named columns
+        a dataframe with the named columns.
     """
     if isinstance(T, list):
         n_T = len(T)
@@ -214,7 +220,7 @@ def bspd_prepareplot(df: pd.DataFrame) -> pd.DataFrame:
 
     Returns:
         a properly melted dataframe for plotting, with columns 'Sample', 'Statistic', 'Value',
-        and 'Group' if there are several integers
+        and 'Group' if there are several integers.
     """
     # check the names of the columns
     values_integers = _check_names_n(df.columns)

@@ -1,38 +1,33 @@
 """This takes in observations of a bivariate random variable `y`
-and computes vector quantiles and vector ranks.
+and computes vector quantiles and vector ranks à la [Chernozhukov-Galichon-Hallin-Henry (*Ann. Stats.* 2017)](https://projecteuclid.org/journals/annals-of-statistics/volume-45/issue-1/MongeKantorovich-depth-quantiles-ranks-and-signs/10.1214/16-AOS1450.full).
+
+
+Note:
+    if the math looks strange in the documentation, just reload the page.
 
 The sequence of steps is as follows:
 
-1.  choose a  number of Chebyshev nodes for numerical integration and
- optimize the weights: `v = solve_for_v(y, n_nodes)`
-
-2a. to obtain the $(u_1,u_2)$ quantiles for $u_1, u_2\\in [0,1]$, run
+* choose a  number of Chebyshev nodes for numerical integration and optimize the weights: `v = solve_for_v(y, n_nodes)`
+* to obtain the $(u_1,u_2)$ quantiles for $(u_1, u_2)\\in [0,1]$, run
 `qtiles_y = bivariate_quantiles_v(y, v, u1, u2)`
-
-2b.  to compute the vector ranks for all points in the sample (the barycenters of the cells in the power diagram):
+* to compute the vector ranks for all points in the sample (the barycenters of the cells in the power diagram):
 `ranks_y = bivariate_ranks_v(y, v, n_nodes)`
 
-Steps 1 and 2a can be combined: `qtiles_y = bivariate_quantiles(y, v, u1, u2, n_nodes)`
+Steps 1 and 2 can be combined: `qtiles_y = bivariate_quantiles(y, v, u1, u2, n_nodes)`
 
-Steps 1 and 2b can be combined: `ranks_y = bivariate_ranks(y, n_nodes)`
+Steps 1 and 3 can be combined: `ranks_y = bivariate_ranks(y, n_nodes)`
 """
 from typing import cast
 
 import numpy as np
 
-from bs_python_utils.bs_opt import (
-    minimize_free,
-    print_optimization_results,
-)
-from bs_python_utils.bsnputils import (
-    TwoArrays,
-    npmaxabs,
-)
+from bs_python_utils.bs_opt import minimize_free, print_optimization_results
+from bs_python_utils.bsnputils import TwoArrays, npmaxabs
 from bs_python_utils.bsutils import bs_error_abort
 from bs_python_utils.chebyshev import Interval, cheb_get_nodes_1d
 
 
-def compute_ab_(y_sorted: np.ndarray, v_sorted: np.ndarray) -> TwoArrays:
+def _compute_ab(y_sorted: np.ndarray, v_sorted: np.ndarray) -> TwoArrays:
     """evaluates the A and B matrices
 
     Args:
@@ -57,7 +52,7 @@ def compute_ab_(y_sorted: np.ndarray, v_sorted: np.ndarray) -> TwoArrays:
     return a_mat, b_mat
 
 
-def compute_u2_bounds_(
+def _compute_u2_bounds(
     k: int, u1: np.ndarray, a_mat: np.ndarray, b_mat: np.ndarray
 ) -> TwoArrays:
     """for given u1, calculates the bounds on u2 that make k the chosen observation
@@ -145,12 +140,12 @@ def bivariate_ranks_v(
         y_sorted = y[sort_order, :]
         v_sorted = v[sort_order]
 
-    a_mat, b_mat = compute_ab_(y_sorted, v_sorted)
+    a_mat, b_mat = _compute_ab(y_sorted, v_sorted)
 
     average_ranks = np.zeros((n, 2))
 
     for k in range(n):
-        left_bounds, right_bounds = compute_u2_bounds_(k, u1_nodes, a_mat, b_mat)
+        left_bounds, right_bounds = _compute_u2_bounds(k, u1_nodes, a_mat, b_mat)
         pos_diffs = np.maximum(right_bounds - left_bounds, 0.0)
         pos_diffs_sq = np.maximum(
             right_bounds * right_bounds - left_bounds * left_bounds, 0.0
@@ -162,7 +157,7 @@ def bivariate_ranks_v(
     return average_ranks
 
 
-def objgrad_(
+def _objgrad(
     v_sorted: np.ndarray, args: list, gr: bool = False
 ) -> float | tuple[float, np.ndarray]:
     """computes the expectation of $\\psi(U, v)$ and perhaps its gradient wrt `v`
@@ -180,12 +175,12 @@ def objgrad_(
     u1_nodes = args[1]
     u1_weights = args[2]
     vs1 = np.append(v_sorted, -np.sum(v_sorted))
-    a_mat, b_mat = compute_ab_(y_sorted, vs1)
+    a_mat, b_mat = _compute_ab(y_sorted, vs1)
 
     obj_val = 0.0
     probs = np.zeros(n)
     for k in range(n):
-        left_bounds, right_bounds = compute_u2_bounds_(k, u1_nodes, a_mat, b_mat)
+        left_bounds, right_bounds = _compute_u2_bounds(k, u1_nodes, a_mat, b_mat)
         pos_diffs = np.maximum(right_bounds - left_bounds, 0.0)
         pos_diffs_sq = np.maximum(
             right_bounds * right_bounds - left_bounds * left_bounds, 0.0
@@ -204,16 +199,16 @@ def objgrad_(
         return cast(float, obj_val)
 
 
-def obj_(v_sorted: np.ndarray, args: list):
-    return objgrad_(v_sorted, args)
+def _obj(v_sorted: np.ndarray, args: list):
+    return _objgrad(v_sorted, args)
 
 
-def grad_(v_sorted: np.ndarray, args: list):
-    res_objg = cast(tuple[float, np.ndarray], objgrad_(v_sorted, args, gr=True))
+def _grad(v_sorted: np.ndarray, args: list):
+    res_objg = cast(tuple[float, np.ndarray], _objgrad(v_sorted, args, gr=True))
     grad_val = res_objg[1]
     verbose = args[3]
     if verbose:
-        print(f"grad_err is {npmaxabs(grad_val)}")
+        print(f"The error on the gradient is {npmaxabs(grad_val)}")
     return grad_val
 
 
@@ -234,7 +229,7 @@ def solve_for_v_(y: np.ndarray, n_nodes: int = 32, verbose: bool = False) -> np.
 
     argsog = [y_sorted, u1_nodes, u1_weights, verbose]
 
-    res = minimize_free(obj_, grad_, v0, args=argsog)
+    res = minimize_free(_obj, _grad, v0, args=argsog)
     if verbose:
         print_optimization_results(res, "Minimizing over v")
 

@@ -1,4 +1,9 @@
-""" personal library of Seaborn plots
+""" Some Seaborn plotting utilities:
+
+* `bs_sns_get_legend`: get the `Legend` object of a Seaborn plot
+* `bs_sns_bar_x_byf`: make a bar plot of `x` by `f`
+* `bs_sns_bar_x_byfg`: make a bar plot of `x` by `f` and `g`
+* `bs_sns_density_estimates`: plots the densities of estimates of several coefficients with several methods, superposed by methods and faceted by coefficients.
 """
 from typing import Callable, cast
 
@@ -13,16 +18,15 @@ SeabornGraph = tuple[mpl.figure.Figure, mpl.figure.Axes]
 
 def bs_sns_get_legend(g: mpl.axes.Axes) -> mpl.legend.Legend:
     """
-    get the legend object of a Seaborn plot
+    Get the `Legend` object of a Seaborn plot.
 
     Args:
         g: the plot object
 
     Returns:
-        leg: the associated Legend object
+        leg: the associated `Legend` object.
     """
-
-    # check axes and find which is have legend
+    # check axes and find which one has a legend
     axs = g.axes
     if isinstance(axs, mpl.axes.Axes):  # only one Axes
         leg = axs.get_legend()
@@ -46,7 +50,7 @@ def bs_sns_bar_x_byf(
     label_f: str | None = None,
     title: str | None = None,
 ) -> SeabornGraph:
-    """make a bar plot of x by f and g
+    """Make a bar plot of `x` by `f`.
 
     Args:
         df: dataframe, should contain columns `xstr` and `fstr`
@@ -58,8 +62,7 @@ def bs_sns_bar_x_byf(
         title: title of plot
 
     Returns:
-        fig: figure
-        ax: axes
+        the plot.
     """
     fig, ax = plt.subplots()
     gbar = sns.barplot(
@@ -92,7 +95,7 @@ def bs_sns_bar_x_byfg(
     label_g: str | None = None,
     title: str | None = None,
 ) -> SeabornGraph:
-    """make a bar plot of x by f and g
+    """Make a bar plot of x by f and g
 
     Args:
         df: dataframe, should contain columns  `xstr`, `fstr`,  and `gstr`
@@ -106,10 +109,9 @@ def bs_sns_bar_x_byfg(
         title: title of plot
 
     Returns:
-        fig: figure
-        ax: axes
+        the plot.
     """
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     gbar = sns.barplot(
         x=fstr,
         y=xstr,
@@ -142,8 +144,8 @@ def bs_sns_density_estimates(
     max_cols: int = 3,
 ) -> sns.FacetGrid:
     """
-    plot of the densities of estimates of several coefficients with several methods,
-    superposed by methods and faceted by coefficients
+    Plots the densities of estimates of several coefficients with several methods,
+    superposed by methods and faceted by coefficients.
 
     Args:
         df: contains columns `method_string`, `coeff_name`, `estimate_value`
@@ -154,7 +156,7 @@ def bs_sns_density_estimates(
         max_cols: we wrap after that
 
     Returns:
-        the `FacetGrid`
+        the `FacetGrid` plot.
 
     """
     g = sns.FacetGrid(

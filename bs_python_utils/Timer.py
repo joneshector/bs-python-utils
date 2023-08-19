@@ -1,5 +1,8 @@
 """
-utilities to time code
+Utilities to time code:
+
+* a `Timer` class that can be used as a context manager
+* a `timeit` decorator for functions.
 """
 
 import time
@@ -29,20 +32,21 @@ class Timer:
     It keeps track of the total elapsed time in the `elapsed` attribute::
 
     Examples:
-       >>> with Timer() as t:
-       >>>  ....
-       >>> print(f"... took {t.elapsed} seconds")
+        >>> with Timer() as t:
+        >>>  ....
+        >>> print(f"... took {t.elapsed} seconds")
 
     use `Timer(time.process_time)` to get only CPU time.
 
-    can also do::
+    can also do:
 
-       >>> t = Timer()
-       >>> t.start()
-       >>> t.stop()
-       >>> t.start()   # will add to the same counter
-       >>> t.stop()
-       >>> print(f"{t.elapsed} seconds total")
+    Examples:
+        >>> t = Timer()
+        >>> t.start()
+        >>> t.stop()
+        >>> t.start()   # will add to the same counter
+        >>> t.stop()
+        >>> print(f"{t.elapsed} seconds total")
     """
 
     def __init__(self, func: Callable = time.perf_counter) -> None:

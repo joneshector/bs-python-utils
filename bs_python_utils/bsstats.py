@@ -35,21 +35,21 @@ class TslsResults:
 
 
 def _powers_Z(Z: np.ndarray, degrees: np.ndarray) -> np.ndarray:
-    """used internally by `proj_Z`; returns `\\prod_{k=1}^m  Z_{\\cdot k}^{l_k}`
+    """used internally by `proj_Z`; returns $\\prod_{k=1}^m  Z_{\\cdot k}^{l_k}$.
 
     Args:
         Z: a matrix `(n, m)`
         list_ints: a list of integers
 
     Returns:
-        the product of the powers of `Z`
+        the product of the powers of `Z`.
     """
     if Z.ndim != 2:
         bs_error_abort(f"Z should have dimension 2, not {Z.ndim}")
     m = Z.shape[1]
     mdegs = check_vector(degrees)
     if mdegs != m:
-        bs_error_abort("The size of degrees should equal the number of columns of Z")
+        bs_error_abort("The size of degrees should equal the number of columns of Z.")
     res = np.ones(Z.shape[0])
     for i, degi in enumerate(degrees):
         res *= Z[:, i] ** degi
@@ -100,7 +100,7 @@ def _make_Zp(Z: np.ndarray, p: int) -> tuple[np.ndarray, int]:
 def proj_Z(
     W: np.ndarray, Z: np.ndarray, p: int = 1, verbose: bool = False
 ) -> tuple[np.ndarray, np.ndarray, float]:
-    """project `W` on `Z` up to degree `p` interactions
+    """project `W` on all interactions of degree `p` or less of `Z`
 
     Args:
         W: variable(s) `(nobs)` or `(nobs, nw)`
@@ -169,16 +169,16 @@ def reg_nonpar(
     n_res: int | None = 1,
 ) -> tuple[KernelReg, np.ndarray]:
     """nonparametric regression of y on the columns of X;
-    bandwidth chosen on a subsample of size nsub if nsub < nobs, and rescaled
+    the bandwidth is chosen on a subsample of size `nsub` if `nsub` < `nobs`, and rescaled.
 
     Args:
         y: a vector of size nobs
         X: a (nobs) vector or a matrix of shape (nobs, m)
-        var_types: specify types of all `X` variables if not all of them are continuous;
-            one character per variable
+        var_types: specify types of all `X` variables if not all of them are continuous; one character per variable
+
             * 'c' for continuous
             * 'u' discrete unordered
-            * 'o' discrete ordered
+            * 'o' discrete ordered.
         n_sub: size of subsample for cross-validation;  by default it is `200^{(m+4)/5}`
         n_res: how many subsamples we draw; 1 by default
 
@@ -220,16 +220,16 @@ def reg_nonpar_fit(
     n_res: int = 1,
     verbose: bool = False,
 ) -> np.ndarray:
-    """nonparametric regression of y on the columns of X; bandwidth chosen on a subsample of size nsub if nsub < nobs, and rescaled
+    """nonparametric regression of y on the columns of X; the bandwidth is chosen on a subsample of size `nsub` if `nsub` < `nobs`, and rescaled.
 
     Args:
         y: a vector of size nobs
         X: a (nobs) vector or a matrix of shape (nobs, m)
-        var_types: specify types of all `X` variables if not all of them are continuous;
-            one character per variable
+        var_types: specify types of all `X` variables if not all of them are continuous; one character per variable
+
             * 'c' for continuous
             * 'u' discrete unordered
-            * 'o' discrete ordered
+            * 'o' discrete ordered.
         n_sub: size of subsample for cross-validation; by default it is `200^{(m+4)/5}`
         n_res: how many subsamples we draw; 1 by default
         verbose: prints stuff if True

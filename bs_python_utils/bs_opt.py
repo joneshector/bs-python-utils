@@ -1,4 +1,16 @@
-""" interface to scipy.optimize """
+""" Interface to `scipy.optimize`:
+
+* `ScalarFunctionAndGradient`, `ProximalFunction` type aliases
+* an `OptimizeParams` class
+* `check_gradient_scalar_function` checks whether an analytical gradient is correct
+* `acc_grad_descent`: accelerated gradient descent for convex, possibly non-smooth functions
+* `minimize_some_fixed`: minimizes a function with some parameter values possibly fixed and some possibly within bounds, using L-BFGS-B
+* `minimize_free`: minimizes a function with some parameter values possibly within bounds
+* `dfp_update, bfgs_update`: compute updates to the inverese Hessian
+* `armijo_alpha, barzilai_borwein_alpha`: two ways of computing the step length
+* `print_optimization_results`, `print_constrained_optimization_results` format the results.
+"""
+
 from dataclasses import dataclass
 from math import sqrt
 from typing import Any, Callable, Iterable, Optional, Union, cast
@@ -14,18 +26,16 @@ from bs_python_utils.Timer import timeit
 ScalarFunctionAndGradient = Callable[
     [np.ndarray, Iterable, Optional[bool]], Union[float, tuple[float, np.ndarray]]
 ]
-"""Type of f(v, args, gr) that returns a scalar value and also a gradient if gr is True"""
+"""Type of `f(v, args, gr)` that returns a scalar value and also a gradient if `gr` is `True`."""
 
 
 ProximalFunction = Callable[[np.ndarray, float, Iterable], np.ndarray]
-"""Type of h(x, t, pars) that returns a scalar value"""
+"""Type of `h(x, t, pars)` that returns a scalar value."""
 
 
 @dataclass
 class OptimizeParams:
-    """
-    used for optimization;
-    combines values, bounds and initial values for a parameter vector
+    """used for optimization; combines values, bounds and initial values for a parameter vector
     """
 
     params_values: np.ndarray | None
@@ -36,15 +46,14 @@ class OptimizeParams:
 def print_optimization_results(
     resus: spopt.OptimizeResult, title: str = "Minimizing"
 ) -> None:
-    """
-    print results from unconstrained optimization
+    """print results from unconstrained optimization.
 
     Args:
         resus: results from optimization
         title: a title
 
     Returns:
-        just prints
+        just prints.
     """
     print_stars(title)
     print(resus.message)
@@ -65,17 +74,16 @@ def print_constrained_optimization_results(
     print_constr: bool = False,
     print_multipliers: bool = False,
 ) -> None:
-    """
-    print results from constrained optimization
+    """print results from constrained optimization.
 
-       Args:
+    Args:
         resus: results from optimization
-        str title: a title
+        title: a title
         print_constr: if `True`, print the values of the constraints
         print_multipliers: if `True`, print the values of the multipliers
 
     Returns:
-        just prints
+        just prints.
     """
     print_stars(title)
     print(resus.message)
@@ -105,7 +113,7 @@ def armijo_alpha(
     tol: float = 0.0,
 ) -> float:
     """Given a function `f` we are minimizing, computes the step size `alpha`
-    to take in the direction `d` using the Armijo rule
+    to take in the direction `d` using the Armijo rule.
 
     Args:
         f: the function
@@ -118,7 +126,7 @@ def armijo_alpha(
         tol: a tolerance
 
     Returns:
-        the step size alpha
+        the step size `alpha`.
     """
     f0 = f(x, args)
     alpha = alpha_init
@@ -137,7 +145,7 @@ def barzilai_borwein_alpha(
     grad_f: Callable, x: np.ndarray, args: Iterable
 ) -> tuple[float, np.ndarray]:
     """Given a function `f` we are minimizing, computes the step size `alpha`
-    to take in the opposite direction of the gradient using the Barzilai-Borwein rule
+    to take in the opposite direction of the gradient using the Barzilai-Borwein rule.
 
     Args:
         grad_f: the gradient of the function
@@ -145,7 +153,7 @@ def barzilai_borwein_alpha(
         args: other arguments passed to `f`
 
     Returns:
-        the step size `alpha` and the gradient `g` at the point `x`
+        the step size `alpha` and the gradient `g` at the point `x`.
     """
     g = grad_f(x, args)
     alpha = 1.0 / spla.norm(g)
@@ -164,7 +172,7 @@ def check_gradient_scalar_function(
     mode: str = "central",
     EPS: float = 1e-6,
 ) -> TwoArrays:
-    """Checks the gradient of a scalar function
+    """Checks the gradient of a scalar function.
 
     Args:
         fg: should return the scalar value, and the gradient if its `gr` argument is `True`
@@ -174,7 +182,7 @@ def check_gradient_scalar_function(
         EPS: the step for forward or central derivatives
 
     Returns:
-        the analytic and numeric gradients
+        the analytic and numeric gradients.
     """
     f0, f_grad = fg(p, args, gr=True)  # type: ignore
     f0 = cast(float, f0)
@@ -218,15 +226,14 @@ def acc_grad_descent(
     maxiter: int = 10000,
 ) -> tuple[np.ndarray, int]:
     """
-    minimizes `(f+h)` by Accelerated Gradient Descent where `f` is smooth and convex  and `h` is convex.
+    Minimizes `(f+h)` by Accelerated Gradient Descent where `f` is smooth and convex  and `h` is convex.
 
     By default `h` is zero.
     The convergence criterion is that the largest component of the absolute value of the gradient must be smaller than `tol`.
 
 
     Args:
-        grad_f: grad_f of `f`; should return an `(n)` array from an `(n)` array \
-        and the `other_ params` object
+        grad_f: grad_f of `f`; should return an `(n)` array from an `(n)` array and the `other_ params` object
         x_init: initial guess, shape `(n)`
         prox_h: proximal projector of `h`, if any
         other_params: an iterable with additional parameters
@@ -236,8 +243,8 @@ def acc_grad_descent(
         beta: floor on step multiplier
         maxiter: max number of iterations
 
-    Returns: 
-        the candidate solution, and a convergence code (0 if successful, 1 if not)
+    Returns:
+        the candidate solution, and a convergence code (0 if successful, 1 if not).
     """
 
     # no proximal projection if no h
@@ -309,7 +316,7 @@ def _fix_some(
     """
     Takes in a function and its gradient, fixes the variables
     whose indices are `fixed_vars` to the values in `fixed_vals`,
-    and returns the modified function and its gradient
+    and returns the modified function and its gradient.
 
     Args:
         obj: the original function
@@ -318,7 +325,7 @@ def _fix_some(
         fixed_vals: their fixed values
 
     Returns:
-        the modified function and its modified gradient function
+        the modified function and its modified gradient function.
     """
 
     def fixed_obj(t, other_args):
@@ -351,7 +358,7 @@ def minimize_some_fixed(
     bounds: list[tuple[float, float]] | None = None,
 ) -> Any:
     """
-    minimize a function with some variables fixed, using L-BFGS-B
+    Minimize a function with some variables fixed, using L-BFGS-B.
 
     Args:
         obj: the original function
@@ -364,7 +371,7 @@ def minimize_some_fixed(
         bounds: the bounds on all variables (those on fixed variables are not used)
 
     Returns:
-        the result of optimization, on all variables
+        the result of optimization, on all variables.
     """
     if fixed_vars is None:
         resopt = spopt.minimize(
@@ -430,7 +437,7 @@ def minimize_free(
     bounds: list[tuple[float, float]] | None = None,
 ) -> Any:
     """
-    minimize a function on all of its variables, using BFGS or L-BFGS-B
+    Minimize a function on all of its variables, using BFGS or L-BFGS-B.
 
     Args:
         obj: the original function
@@ -441,7 +448,7 @@ def minimize_free(
         bounds: the bounds on all variables, if any
 
     Returns:
-        the result of optimization, on all variables
+        the result of optimization, on all variables.
     """
     if bounds is None:
         resopt = spopt.minimize(
@@ -469,7 +476,7 @@ def minimize_free(
 def dfp_update(
     hess_inv: np.ndarray, gradient_diff: np.ndarray, x_diff: np.ndarray
 ) -> np.ndarray:
-    """runs a DFP update for the inverse Hessian
+    """Runs a DFP update for the inverse Hessian.
 
     Args:
         hess_inv: the current inverse Hessian
@@ -477,7 +484,7 @@ def dfp_update(
         x_diff: the update in x
 
     Returns:
-        the updated inverse Hessian
+        the updated inverse Hessian.
     """
     xdt = x_diff.T
     xxp = x_diff @ xdt
@@ -491,7 +498,7 @@ def dfp_update(
 def bfgs_update(
     hess_inv: np.ndarray, gradient_diff: np.ndarray, x_diff: np.ndarray
 ) -> np.ndarray:
-    """runs a DFP update for the inverse Hessian
+    """Runs a BFGS update for the inverse Hessian.
 
     Args:
         hess_inv: the current inverse Hessian
@@ -499,7 +506,7 @@ def bfgs_update(
         x_diff: the update in x
 
     Returns:
-        the updated inverse Hessian
+        the updated inverse Hessian.
     """
     xdt = x_diff.T
     xpg = xdt @ gradient_diff

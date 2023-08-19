@@ -1,6 +1,11 @@
 """
-distance covariance and partial distance covariance (Szekely and Rizzo)
-evaluation and tests of independence and conditional independence
+Distance covariance and partial distance covariance à la Szekely and Rizzo;
+evaluation and tests of independence and conditional independence:
+
+* `DcovResults`, `PdcovResults`: classes for distance covariances
+* `dcov_dcor`: `evaluates the distance covariance and correlation of two random variables
+* `pdcov_pdcor`: evaluates the partial distance covariance and correlation of `X` and `Y` given `Z`
+* `pvalue_dcov`: test of no dependence between `X` and `Y` given `Z`.
 """
 
 from dataclasses import dataclass
