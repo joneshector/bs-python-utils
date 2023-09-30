@@ -3,6 +3,7 @@
 * `alt_lineplot`, `alt_superposed_lineplot`, `alt_superposed_faceted_lineplot`
 * `alt_plot_fun`: plots a function
 * `alt_density`, `alt_faceted_densities`: plots the density of `x`, or of `x` conditional on a category
+* `alt_superposed_faceted_densities`: plots the density of `x` superposed by `f` and faceted by `g`
 * `alt_scatterplot`, `alt_scatterplot_with_histo`, `alt-linked_scatterplots`: variants of scatter plots
 * `alt_histogram_by`, `alt_histogram_continuous`: histograms of `x` by `y`, and of a continuous `x`
 * `alt_stacked_area`,`alt_stacked_area_facets`: stacked area plots
@@ -221,6 +222,51 @@ def alt_density(df: pd.DataFrame, str_x: str, save: str | None = None) -> alt.Ch
 
     _maybe_save(ch, save)
     return ch
+
+
+def alt_superposed_faceted_densities(
+    df: pd.DataFrame,
+    str_x: str,
+    str_f: str,
+    str_g: str,
+    max_cols: int | None = 4,
+    save: str | None = None,
+) -> alt.Chart:
+    """
+    Creates density plots of `df[str_x]` by `df[str_f]` and `df[str_g]`
+    with color as per `df[str_f]` and faceted by `df[str_g]`.
+    that is: facets by `str_g`, with densities conditional on `str_f` superposed.
+
+    Args:
+        df: a Pandas dataframe wity columns `str_x`, `str_f`, `str_g`
+        str_x: the name of a continuous column
+        str_f: the name of a categorical column
+        str_g: the name of a categorical column
+        max_cols: the number of columns after whcih we wrap
+        save: the name of a file to save to (HTML extension will be added)
+
+    Returns:
+          the `alt.Chart` object.
+    """
+    densities = (
+        alt.Chart(df)
+        .transform_density(
+            str_x,
+            groupby=[str_f, str_g],
+            as_=[str_x, "Density"],
+        )
+        .mark_line()
+        .encode(
+            x=f"{str_x}:Q",
+            y="Density:Q",
+            color=f"{str_f}:N",
+        )
+        .facet(column=f"{str_g}:N", columns=max_cols)
+        .resolve_scale(x="independent", y="independent")
+    )
+    _maybe_save(densities, save)
+
+    return densities
 
 
 def alt_linked_scatterplots(

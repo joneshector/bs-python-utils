@@ -15,6 +15,7 @@ from bs_python_utils.bs_altair import (
     alt_scatterplot_with_histo,
     alt_stacked_area,
     alt_stacked_area_facets,
+    alt_superposed_faceted_densities,
     alt_superposed_faceted_lineplot,
     alt_superposed_lineplot,
     alt_tick_plots,
@@ -41,6 +42,15 @@ ch = alt_superposed_faceted_lineplot(
     "Year",
     save="cars_superposed_faceted_lineplot",
 )
+
+ch = alt_superposed_faceted_densities(
+    cars,
+    "Horsepower",
+    "Year",
+    "Origin",
+    save="cars_superposed_faceted_densities",
+)
+
 
 ch = alt_histogram_continuous(cars, "Horsepower", save="cars_histo_cont")
 
@@ -148,7 +158,7 @@ ch = plot_parameterized_estimates(
     ["MLE", "MM"],
     estimates,
     colors=["black", "green", "blue"],
-    save="ppe.html",
+    save="ppe",
 )
 
 stats = np.reshape(estimates, (nvals, 4))
@@ -161,7 +171,7 @@ ch = plot_true_sim_facets(
     stats,
     colors=["black", "red"],
     ncols=2,
-    save="ptsf.html",
+    save="ptsf",
 )
 
 stats2 = stats + np.random.normal(loc=0.1, scale=0.2, size=stats.shape)
@@ -174,7 +184,7 @@ ch = plot_true_sim2_facets(
     stats2,
     colors=["black", "red", "green"],
     ncols=2,
-    save="pts2f.html",
+    save="pts2f",
 )
 
 ch = alt_tick_plots(cars, "Weight_in_lbs", save="weight_ticks")
