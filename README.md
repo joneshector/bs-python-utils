@@ -12,8 +12,8 @@ My Python utilities.
 -   **Documentation** <https://bsalanie.github.io/bs-python-utils/>
 
 ### Release notes
-#### 0.5.3 (August 19, 2023)
-Improved the documentation.
+#### 0.5.5 (October 23, 2023)
+Added `fstring***` in `bsutils`.
 #### 0.5.2 (August 16, 2023)
 Added two interpolation routines from values at the Chebyshev nodes in `chebyshev` module.
 #### 0.5.1 (August 14, 2023)

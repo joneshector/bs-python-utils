@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bs_python_utils"
-version = "0.5.3"
+version = "0.5.5"
 description = "my Python utilities"
 authors = ["Bernard Salanie <bsalanie@columbia.edu>"]
 repository = "https://github.com/bsalanie/bs-python-utils"

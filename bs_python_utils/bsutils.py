@@ -9,6 +9,7 @@ Contains various utilities programs:
 * `find_first`: returns the index of and the first item in an iterable that satisfies a condition
 * `print_stars`: prints a title within lines of stars
 * `file_print_stars`: does the same, to a file
+* `fstring_integer_with_significant_digits`: rounds an integer and returns an f-string
 * `mkdir_if_needed`: creates a directory if it does not exist
 * `bscomb`: a combination ${n \\choose k}$ operator
 * `bslog, bsxlogx, bsexp`: $C^2$ extensions of $\\log(x), x\\log x, \\exp(x)$, and their first two derivatives
@@ -89,6 +90,38 @@ def final_s(n: int, word: str) -> str:
     """
     suffix = "s" if n > 1 else ""
     return f"{n} {word}{suffix}"
+
+
+def fstring_integer_with_significant_digits(number: int, m: int) -> str:
+    """returns an f-string with `number` rounded to `m` significant digits
+
+    Args:
+        number: the integer we want to round
+        m:  how many digits we keep; the rest is filled with zeroes
+
+    Return:
+        a string with the rounded integer
+
+    Examples:
+    >>> fstring_integer_with_significant_digits(12345, 0)
+    ' 0'
+    >>> fstring_integer_with_significant_digits(12345, 3)
+    '12,300'
+    >>> fstring_integer_with_significant_digits(12345, 7)
+    '12345'
+    """
+    if (not isinstance(number, int)) or (not isinstance(m, int)):
+        bs_error_abort("Both arguments should be integers.")
+    if number == 0:
+        return f"{number:d}"
+    else:
+        digits = len(str(abs(int(number))))
+        if digits <= m:
+            return f"{int(number):d}"
+        else:
+            power = digits - m
+            rounded = round(number / 10**power) * 10**power
+            return f"{int(rounded): ,d}"
 
 
 def bs_switch(
