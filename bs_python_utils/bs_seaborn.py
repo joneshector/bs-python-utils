@@ -13,10 +13,10 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-SeabornGraph = tuple[mpl.figure.Figure, mpl.figure.Axes]
+SeabornGraph = tuple[mpl.figure.Figure, mpl.axes.Axes]
 
 
-def bs_sns_get_legend(g: mpl.axes.Axes) -> mpl.legend.Legend:
+def bs_sns_get_legend(g: SeabornGraph) -> mpl.legend.Legend:
     """
     Get the `Legend` object of a Seaborn plot.
 
@@ -27,7 +27,7 @@ def bs_sns_get_legend(g: mpl.axes.Axes) -> mpl.legend.Legend:
         leg: the associated `Legend` object.
     """
     # check axes and find which one has a legend
-    axs = g.axes
+    axs = g[1]
     if isinstance(axs, mpl.axes.Axes):  # only one Axes
         leg = axs.get_legend()
     else:

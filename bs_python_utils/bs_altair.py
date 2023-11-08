@@ -9,7 +9,8 @@
 * `alt_stacked_area`,`alt_stacked_area_facets`: stacked area plots
 * `plot_parameterized_estimates`: plots densities of estimates of coefficients, with the true values,  as a function of a parameter
 * `plot_true_sim_facets, plot_true_sim2_facets`:  plot two simulated values and  the true values of statistics as a function of a parameter
-* `alt_tick_plots`: vertically arranged tick plots of variables.
+* `alt_tick_plots`: vertically arranged tick plots of variables
+* `alt_matrix_heatmap`: plots a heatmap of a matrix.
 """
 
 from typing import Callable, cast
@@ -157,6 +158,63 @@ def alt_lineplot(
         ch = ch.properties(title=kwargs["title"])
         _maybe_save(ch, save)
     return ch
+
+
+def alt_matrix_heatmap(
+    mat: np.ndarray,
+    str_format: str,
+    str_tit: str | None = None,
+    str_rows: str | None = "Row",
+    str_cols: str | None = "Column",
+) -> alt.Chart:
+    """Plots a heatmap of a matrix
+
+    Args:
+        mat: the matrix to plot
+        str_format: the string to format the values, e.g. "d" or ".3f"
+        str_tit: a title, if any
+        str_rows: the name of the variable in the rows
+        str_cols: the name of the variable in the columns
+
+    Returns:
+        the heatmap
+    """
+    n_rows, n_cols = check_matrix(mat)
+    mat_arr = np.empty((mat.size, 4))
+    type_vals = "float"
+    if "d" in str_format:  # integer values
+        mat = np.round(mat)
+        type_vals = "int"
+    mat_min = np.min(mat)
+    i = 0
+    for ix in range(n_rows):
+        for iy in range(n_cols):
+            m = mat[ix, iy]
+            s = m - mat_min + 1
+            mat_arr[i, :] = np.array([ix, iy, m, s])
+            i += 1
+
+    mat_df = pd.DataFrame(mat_arr, columns=[str_rows, str_cols, "Value", "Size"])
+    if type_vals == "int":
+        mat_df = mat_df.astype(
+            dtype={str_rows: int, str_cols: int, "Value": int, "Size": float}
+        )
+    else:
+        mat_df = mat_df.astype(
+            dtype={str_rows: int, str_cols: int, "Value": float, "Size": float}
+        )
+    base = alt.Chart(mat_df).encode(
+        x=f"{str_rows}:O", y=alt.Y(f"{str_cols}:O", sort="descending")
+    )
+    mat_map = base.mark_circle(opacity=0.4).encode(size=alt.Size("Size:Q", legend=None))
+    text = base.mark_text(baseline="middle", fontSize=16).encode(
+        text=alt.Text("Value:Q", format=str_format),
+    )
+    if str_tit is None:
+        both = (mat_map + text).properties(width=500, height=500)
+    else:
+        both = (mat_map + text).properties(title=str_tit, width=400, height=400)
+    return both
 
 
 def alt_plot_fun(

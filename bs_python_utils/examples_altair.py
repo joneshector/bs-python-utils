@@ -10,6 +10,7 @@ from bs_python_utils.bs_altair import (
     alt_histogram_by,
     alt_histogram_continuous,
     alt_linked_scatterplots,
+    alt_matrix_heatmap,
     alt_plot_fun,
     alt_scatterplot,
     alt_scatterplot_with_histo,
@@ -190,3 +191,7 @@ ch = plot_true_sim2_facets(
 ch = alt_tick_plots(cars, "Weight_in_lbs", save="weight_ticks")
 
 ch = alt_tick_plots(cars, ["Horsepower", "Weight_in_lbs"], save="horse_weight_ticks")
+
+
+mat = np.arange(24).reshape((4, 6))
+ch = alt_matrix_heatmap(mat, "d")

@@ -32,6 +32,9 @@ nav:
       - Matplotlib: bsmplutils.md
       - Seaborn: bs_seaborn.md
       - Altair: bs_altair.md
+    - Streamlit:
+      - Utilities: streamlit_utils.md
+
 plugins:
   - search:
   - mkdocstrings:
