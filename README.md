@@ -8,33 +8,55 @@
 
 My Python utilities.
 
--   **Github repository**: <https://github.com/bsalanie/bs-python-utils/>
--   **Documentation** <https://bsalanie.github.io/bs-python-utils/>
+- **Github repository**: <https://github.com/bsalanie/bs-python-utils/>
+- **Documentation** <https://bsalanie.github.io/bs-python-utils/>
 
 ### Release notes
+
+#### 0.6 (November 9, 2023)
+
+Added matrix heatmap plot in Altair and Streamlit utility code.
+
 #### 0.5.5 (October 23, 2023)
+
 Added `fstring***` in `bsutils`.
+
 #### 0.5.2 (August 16, 2023)
+
 Added two interpolation routines from values at the Chebyshev nodes in `chebyshev` module.
+
 #### 0.5.1 (August 14, 2023)
-Added two functions to draw random samples in  `bsstats` module.
+
+Added two functions to draw random samples in `bsstats` module.
+
 #### 0.5 (August 7, 2023)
+
 Added 1-dimensional root finding in `chebyshev` module.
+
 #### 0.4.2 (August 2, 2023)
+
 Updated the docs.
+
 #### 0.4.1 (July 23, 2023)
+
 Only print if verbose in bivariate quantiles.
+
 #### 0.4 (July 22, 2023)
+
 Added bivariate quantiles and ranks à la optimal transportation.
+
 #### 0.3 (July 21, 2023)
+
 Added in Numpy utils a function to set upper and lower triangle to a scalar;
 and `minimize_free` in `bs_opt`.
 
 #### 0.2 (July 17, 2023)
+
 Fixed printing in accelerated gradient descent.
 
 #### 0.1 (June 20, 2023)
-Added `grid_function` and the `chebyshev` module. 
+
+Added `grid_function` and the `chebyshev` module.
 
 #### 0.0.6 (May 9, 2023)
 

@@ -156,25 +156,29 @@ def alt_lineplot(
     ch = alt.Chart(df).mark_line().encode(x=f"{str_x}:{type_x}", y=var_y)
     if "title" in kwargs:
         ch = ch.properties(title=kwargs["title"])
-        _maybe_save(ch, save)
+    _maybe_save(ch, save)
     return ch
 
 
 def alt_matrix_heatmap(
     mat: np.ndarray,
     str_format: str,
-    str_tit: str | None = None,
+    multiple: float = 1.0,
+    title: str | None = None,
     str_rows: str | None = "Row",
     str_cols: str | None = "Column",
+    save: str | None = None,
 ) -> alt.Chart:
     """Plots a heatmap of a matrix
 
     Args:
         mat: the matrix to plot
         str_format: the string to format the values, e.g. "d" or ".3f"
-        str_tit: a title, if any
+        multiple: increases the size of the circles
+        title: a title, if any
         str_rows: the name of the variable in the rows
         str_cols: the name of the variable in the columns
+        save: the name of a file to save to (HTML extension will be added)
 
     Returns:
         the heatmap
@@ -206,14 +210,22 @@ def alt_matrix_heatmap(
     base = alt.Chart(mat_df).encode(
         x=f"{str_rows}:O", y=alt.Y(f"{str_cols}:O", sort="descending")
     )
-    mat_map = base.mark_circle(opacity=0.4).encode(size=alt.Size("Size:Q", legend=None))
+    mat_map = base.mark_circle(opacity=0.4).encode(
+        size=alt.Size(
+            "Size:Q",
+            legend=None,
+            scale=alt.Scale(range=[1000 * multiple, 10000 * multiple]),
+        )
+    )
     text = base.mark_text(baseline="middle", fontSize=16).encode(
         text=alt.Text("Value:Q", format=str_format),
     )
-    if str_tit is None:
+    if title is None:
         both = (mat_map + text).properties(width=500, height=500)
     else:
-        both = (mat_map + text).properties(title=str_tit, width=400, height=400)
+        both = (mat_map + text).properties(title=title, width=400, height=400)
+
+    _maybe_save(both, save)
     return both
 
 

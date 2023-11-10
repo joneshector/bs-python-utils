@@ -3,6 +3,7 @@
 * `init_logger` initializes and returns a customized logger
 * `log_execution` ia a decorator to log entry into and ext from a function.
 """
+
 import functools
 import logging
 from pathlib import Path
@@ -13,7 +14,7 @@ def init_logger(
     logger_name: str,
     log_level_for_console: str = "info",
     log_level_for_file: str = "debug",
-    save_dir: str = None,
+    save_dir: str | None = None,
 ) -> logging.Logger:
     """
     Initialize a logger

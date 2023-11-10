@@ -17,7 +17,7 @@ from bs_python_utils.bsutils import print_stars
 
 def bspd_print(
     df: pd.DataFrame,
-    s: str | None = "",
+    s: str = "",
     max_rows: int | None = None,
     max_cols: int | None = None,
     precision: int | None = None,
@@ -93,7 +93,7 @@ def bspd_cross_products(
     return df_cprods
 
 
-def _list_str(names: str | list[str], suffix: str = None) -> list[str]:
+def _list_str(names: str | list[str], suffix: str | None = None) -> list[str]:
     """make a list of strings with possibly the added suffix
 
     Args:

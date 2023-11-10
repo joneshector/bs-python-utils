@@ -18,6 +18,7 @@ Contains various utilities programs:
 Note:
     if the math looks strange in the documentation, just reload the page.
 """
+
 import sys
 import traceback
 from functools import wraps
@@ -194,7 +195,7 @@ def find_first(iterable: Iterable, condition: Callable = lambda x: True) -> Any:
     return next((i, x) for i, x in enumerate(iterable) if condition(x))
 
 
-def print_stars(title: str = None, n: int = 70) -> None:
+def print_stars(title: str | None = None, n: int = 70) -> None:
     """
     prints a title within stars
 
@@ -214,7 +215,9 @@ def print_stars(title: str = None, n: int = 70) -> None:
     print()
 
 
-def file_print_stars(file_handle: TextIOBase, title: str = None, n: int = 70) -> None:
+def file_print_stars(
+    file_handle: TextIOBase, title: str | None = None, n: int = 70
+) -> None:
     """
     prints to a file a title within stars
 

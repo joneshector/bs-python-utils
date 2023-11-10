@@ -49,7 +49,7 @@ Function_xargs = Callable[[np.ndarray, list], float]
 ArrayFunctionOfArray = Callable[[np.ndarray], np.ndarray]
 
 
-def check_vector(v: Any, fun_name: str = None) -> int:
+def check_vector(v: Any, fun_name: str | None = None) -> int:
     """
     test that `v` is a vector; aborts otherwise
 
@@ -70,7 +70,7 @@ def check_vector(v: Any, fun_name: str = None) -> int:
     return cast(int, v.size)
 
 
-def check_matrix(x: Any, fun_name: str = None) -> tuple[int, int]:
+def check_matrix(x: Any, fun_name: str | None = None) -> tuple[int, int]:
     """
     test that `x` is a matrix; aborts otherwise
 
@@ -91,7 +91,7 @@ def check_matrix(x: Any, fun_name: str = None) -> tuple[int, int]:
     return cast(tuple[int, int], x.shape)
 
 
-def check_vector_or_matrix(x: Any, fun_name: str = None) -> int:
+def check_vector_or_matrix(x: Any, fun_name: str | None = None) -> int:
     """
     test that `x` is a vector or a matrix; aborts otherwise
 
@@ -112,7 +112,7 @@ def check_vector_or_matrix(x: Any, fun_name: str = None) -> int:
     return cast(int, ndims_x)
 
 
-def check_square(A: Any, fun_name: str = None) -> int:
+def check_square(A: Any, fun_name: str | None = None) -> int:
     """
     test that an object used in `fun_name` is a square matrix
 
@@ -136,7 +136,7 @@ def check_square(A: Any, fun_name: str = None) -> int:
     return cast(int, n)
 
 
-def check_tensor(x: Any, n_dims: int, fun_name: str = None) -> tuple[int, ...]:
+def check_tensor(x: Any, n_dims: int, fun_name: str | None = None) -> tuple[int, ...]:
     """
     test that `x` is an `n_dims` dimensional array; aborts otherwise
 
@@ -950,7 +950,7 @@ def gaussian_expectation(
     w: np.ndarray | None,
     n: int = 16,
     vectorized: bool = False,
-    pars: Iterable = None,
+    pars: Iterable | None = None,
 ) -> np.ndarray | float:
     """
     computes the expectation of a function of an `N(0,1)` random variable
