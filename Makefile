@@ -1,3 +1,5 @@
+TOKEN=${PYPI_TOKEN}
+
 .PHONY: install
 install: ## Install the poetry environment and install the pre-commit hooks
 	@echo "🚀 Creating virtual environment using pyenv and poetry"
@@ -33,9 +35,9 @@ clean-build: ## clean build artifacts
 .PHONY: publish
 publish: ## publish a release to pypi.
 	@echo "🚀 Publishing: Dry run."
-	@poetry publish --dry-run -u bsalanie -p ${PYPI_PASSWD}
+	@poetry publish --dry-run -u __token__ -p pypi-${TOKEN}
 	@echo "🚀 Publishing."
-	@poetry publish -u bsalanie -p ${PYPI_PASSWD}
+	@poetry publish -u __token__ -p pypi-${TOKEN}
 
 .PHONY: build-and-publish
 build-and-publish: build publish ## Build and publish.
