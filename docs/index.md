@@ -13,6 +13,9 @@ My Python utilities.
 
 ### Release notes
 
+#### 0.6.1 and 0.6.2 (November 18, 2023)
+Added a Matplotlib plot for discrete choice models, a boxplot for Altair, and a density plot for Seaborn.
+
 #### 0.6 (November 9, 2023)
 
 Added matrix heatmap plot in Altair and Streamlit utility code.
