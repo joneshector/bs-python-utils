@@ -3,8 +3,10 @@
 * `bs_sns_get_legend`: get the `Legend` object of a Seaborn plot
 * `bs_sns_bar_x_byf`: make a bar plot of `x` by `f`
 * `bs_sns_bar_x_byfg`: make a bar plot of `x` by `f` and `g`
+* `bs_sns_plot_density`: basic density plot
 * `bs_sns_density_estimates`: plots the densities of estimates of several coefficients with several methods, superposed by methods and faceted by coefficients.
 """
+
 from typing import Callable, cast
 
 import matplotlib as mpl
@@ -133,6 +135,26 @@ def bs_sns_bar_x_byfg(
     if title is not None:
         ax.set_title(title)
     return cast(SeabornGraph, gbar)
+
+
+def bs_sns_plot_density(
+    df: pd.DataFrame, var_name: str, save_to: str | None = None
+) -> None:
+    """plots the density of a variable
+
+    Args:
+        df: dataframe, should contain column `var_name`
+        var_name:  the name of a continuous variable
+        save_to: (maybe) where we save the plot, with `.png` extension.
+    """
+    var_y = df[var_name].values
+    var_fig = sns.kdeplot(var_y)
+    var_fig.axvline(x=0, c="k", ls="dashed")
+    var_fig.set_title(f"Density of the {var_name}")
+    var_fig.set_xlabel(f"Value of {var_name}")
+    var_fig.set_ylabel("Value of the density")
+    if save_to:
+        plt.savefig(f"{save_to}.png")
 
 
 def bs_sns_density_estimates(
