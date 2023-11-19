@@ -4,6 +4,7 @@ import numpy as np
 from vega_datasets import data
 
 from bs_python_utils.bs_altair import (
+    alt_boxes,
     alt_density,
     alt_faceted_densities,
     alt_histogram_by,
@@ -25,6 +26,8 @@ from bs_python_utils.bs_altair import (
 )
 
 cars = data.cars()
+
+ch = alt_boxes(cars, "Horsepower", "Origin", "Year", save="../Graphs/cars_boxes")
 
 ch = alt_superposed_lineplot(
     cars,

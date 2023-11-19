@@ -127,6 +127,47 @@ def alt_scatterplot(
     return ch
 
 
+def alt_boxes(
+    df: pd.DataFrame,
+    continuous_var: str,
+    discrete_var: str,
+    group_var: str,
+    max_cols: int = 3,
+    title: str | None = None,
+    save: str | None = None,
+) -> alt.Chart:
+    """horizontal boxplots of `df[continuous_var]` by `df[discrete_var]` and `df[group_var]`
+
+    Args:
+        df: datframe with the three variables
+        continuous_var: name of the continuous variable
+        discrete_var: name of the discrete variable
+        group_var: name of the grouping variable
+        max_cols: maximum number of columns. Defaults to 3.
+        title: a plot title. Defaults to None.
+        save: the name of a file to save to (HTML extension will be added). Defaults to None.
+
+    Returns:
+        the chart.
+    """
+    boxes = (
+        (
+            alt.Chart(df)
+            .mark_boxplot()
+            .encode(
+                x=f"{continuous_var}:Q", y=f"{discrete_var}:O", color=f"{group_var}:N"
+            )
+            .properties(width=180, height=180)
+        )
+        .facet(f"{group_var}:N", columns=max_cols)
+        .resolve_scale(y="independent")
+    )
+    if title:
+        boxes = boxes.properties(title=title)
+    _maybe_save(boxes, save)
+    return boxes
+
+
 def alt_lineplot(
     df: pd.DataFrame,
     str_x: str,
