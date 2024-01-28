@@ -7,40 +7,51 @@
 * `bs_sns_density_estimates`: plots the densities of estimates of several coefficients with several methods, superposed by methods and faceted by coefficients.
 """
 
-from typing import Callable, cast
+from collections.abc import Callable
+from typing import cast
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib.axes import Axes
 
-SeabornGraph = tuple[mpl.figure.Figure, mpl.axes.Axes]
 
-
-def bs_sns_get_legend(g: SeabornGraph) -> mpl.legend.Legend:
-    """
-    Get the `Legend` object of a Seaborn plot.
+def bs_regplot(
+    data: pd.DataFrame,
+    x: str,
+    y: str,
+    title: str | None = None,
+    line_color: str = "red",
+    save: str | None = None,
+) -> Axes:
+    """Draw a seaborn regplot with title and legend.
 
     Args:
-        g: the plot object
+        data: dataframe, should contain columns `x` and `y`
+        x: column name of x
+        y: column name of y
+        title: title of plot
+        line_color: color of the regression line. Red by default
+        save: where to save it, if requested
 
     Returns:
-        leg: the associated `Legend` object.
+        the plot
     """
-    # check axes and find which one has a legend
-    axs = g[1]
-    if isinstance(axs, mpl.axes.Axes):  # only one Axes
-        leg = axs.get_legend()
-    else:
-        for ax in axs.flat():
-            leg = ax.get_legend()
-            if leg is not None:
-                break
-    # or legend may be on a figure
-    if leg is None:
-        leg = g._legend
-    return leg
+    sns.set_style("whitegrid")
+    g = sns.regplot(
+        data=data,
+        x=x,
+        y=y,
+        label="Data",
+        line_kws={"label": "Linear Fit (95% CI)", "color": line_color},
+    )
+    if title:
+        plt.title(title)
+    plt.legend(loc="best")
+    if save:
+        plt.savefig(f"{save}.png", dpi=400)
+    return cast(Axes, g)
 
 
 def bs_sns_bar_x_byf(
@@ -51,7 +62,7 @@ def bs_sns_bar_x_byf(
     label_x: str | None = None,
     label_f: str | None = None,
     title: str | None = None,
-) -> SeabornGraph:
+) -> Axes:
     """Make a bar plot of `x` by `f`.
 
     Args:
@@ -83,7 +94,7 @@ def bs_sns_bar_x_byf(
     ax.set_ylabel(ylab)
     if title is not None:
         ax.set_title(title)
-    return cast(SeabornGraph, gbar)
+    return cast(Axes, gbar)
 
 
 def bs_sns_bar_x_byfg(
@@ -96,7 +107,7 @@ def bs_sns_bar_x_byfg(
     label_f: str | None = None,
     label_g: str | None = None,
     title: str | None = None,
-) -> SeabornGraph:
+) -> Axes:
     """Make a bar plot of x by f and g
 
     Args:
@@ -130,11 +141,10 @@ def bs_sns_bar_x_byfg(
     ax.set_xlabel(xlab)
     ax.set_ylabel(ylab)
     if label_g is not None:
-        gbar_legend = bs_sns_get_legend(gbar)
-        gbar_legend.set_title(label_g)
+        plt.gca().legend(title=label_g)
     if title is not None:
         ax.set_title(title)
-    return cast(SeabornGraph, gbar)
+    return cast(Axes, gbar)
 
 
 def bs_sns_plot_density(

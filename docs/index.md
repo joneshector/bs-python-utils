@@ -13,6 +13,9 @@ My Python utilities.
 
 ### Release notes
 
+#### 0.6.4 (November 26, 2023)
+Moved to Altair 5.0; made timing optional in `bs_opt`.
+
 #### 0.6.3 (November 26, 2023)
 Updated statsmodels dependency.
 

@@ -1,4 +1,5 @@
 """examples using my sklearn code"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
@@ -12,7 +13,7 @@ y = X1 * X2 * X2 / 100.0 - (X1 / 5.0 - X2 / 3.0) ** 3 + np.random.normal(size=n_
 
 X = np.column_stack((X1, X2))
 
-plt.style.use("seaborn")
+plt.style.use("seaborn-v0_8")
 
 degree = 10
 stdsc = StandardScaler()

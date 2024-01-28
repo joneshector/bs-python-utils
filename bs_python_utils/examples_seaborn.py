@@ -1,12 +1,9 @@
 """examples using my Seaborn functions"""
 
+import matplotlib.pyplot as plt
 import seaborn as sns
 
-from bs_python_utils.bs_seaborn import (
-    bs_sns_bar_x_byf,
-    bs_sns_bar_x_byfg,
-    bs_sns_get_legend,
-)
+from bs_python_utils.bs_seaborn import bs_regplot, bs_sns_bar_x_byf, bs_sns_bar_x_byfg
 
 cars = sns.load_dataset("mpg")
 
@@ -19,6 +16,8 @@ g1 = bs_sns_bar_x_byf(
     title="Mean HP by number of cylinders",
 )
 
+plt.clf()
+
 g2 = bs_sns_bar_x_byfg(
     cars,
     "horsepower",
@@ -30,8 +29,13 @@ g2 = bs_sns_bar_x_byfg(
     title="Mean HP by number of cylinders and origin",
 )
 
-# change labels in legend
-l2 = bs_sns_get_legend(g2)
-labels2 = ["USA", "Japan", "Europe"]
-for t, lab in zip(l2.texts, labels2, strict=True):
-    t.set_text(lab)
+plt.clf()
+
+# regression plot
+g3 = bs_regplot(
+    cars,
+    "weight",
+    "horsepower",
+    title="Mean HP by weight",
+    save="../Graphs/bs_regplot",
+)

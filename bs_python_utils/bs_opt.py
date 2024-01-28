@@ -13,6 +13,7 @@
 
 from dataclasses import dataclass
 from math import sqrt
+from time import perf_counter
 from typing import Any, Callable, Iterable, Optional, Union, cast
 
 import numpy as np
@@ -346,7 +347,6 @@ def _fix_some(
     return fixed_obj, fixed_grad_obj
 
 
-@timeit
 def minimize_some_fixed(
     obj: Callable,
     grad_obj: Callable,
@@ -356,6 +356,7 @@ def minimize_some_fixed(
     fixed_vals: np.ndarray | None,
     options: dict | None = None,
     bounds: list[tuple[float, float]] | None = None,
+    time_execution: bool = False,
 ) -> Any:
     """
     Minimize a function with some variables fixed, using L-BFGS-B.
@@ -369,10 +370,13 @@ def minimize_some_fixed(
         args: other parameters
         options: any options passed on to `scipy.optimize.minimize`
         bounds: the bounds on all variables (those on fixed variables are not used)
+        time_execution: if `True`, time the execution and print the result
 
     Returns:
         the result of optimization, on all variables.
     """
+    if time_execution:
+        time_start = perf_counter()
     if fixed_vars is None:
         resopt = spopt.minimize(
             obj,
@@ -424,10 +428,17 @@ def minimize_some_fixed(
         g = grad_obj(np.array(t_full), args)
         resopt.jac = g
 
+        if time_execution:
+            time_end = perf_counter()
+            print(
+                "\nTime elapsed in minimization:"
+                f" {time_end - time_start: >.3f} seconds.\n"
+            )
+
     return resopt
 
 
-@timeit
+# @timeit
 def minimize_free(
     obj: Callable,
     grad_obj: Callable,

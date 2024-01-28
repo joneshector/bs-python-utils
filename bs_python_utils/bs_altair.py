@@ -13,7 +13,8 @@
 * `alt_matrix_heatmap`: plots a heatmap of a matrix.
 """
 
-from typing import Callable, cast
+from collections.abc import Callable
+from typing import cast
 
 import altair as alt
 import numpy as np
@@ -35,7 +36,7 @@ def _add_title(ch: alt.Chart, title: str | None = None) -> alt.Chart:
             ch = ch.properties(title=title)
         else:
             bs_error_abort(f"title must be a string, not {title}")
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_scatterplot(
@@ -85,7 +86,7 @@ def alt_scatterplot(
 
     if ylabel is not None:
         if isinstance(ylabel, str):
-            var_y = alt.Y(var_y, axis=alt.Axis(title=ylabel))
+            var_y_lab = alt.Y(var_y, axis=alt.Axis(title=ylabel))
         else:
             bs_error_abort(f"ylabel must be a string, not {ylabel}")
 
@@ -103,13 +104,13 @@ def alt_scatterplot(
                     .mark_circle(size=circles_size)
                     .encode(
                         x=var_x,
-                        y=var_y,
+                        y=var_y if ylabel is None else var_y_lab,
                         color=color,
                         opacity=alt.condition(
                             selection_criterion, alt.value(1), alt.value(0.1)
                         ),
                     )
-                    .add_selection(selection_criterion)
+                    .add_params(selection_criterion)
                 )
             else:
                 ch = (
@@ -124,7 +125,7 @@ def alt_scatterplot(
 
     ch = _add_title(ch, title)
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_boxes(
@@ -165,7 +166,7 @@ def alt_boxes(
     if title:
         boxes = boxes.properties(title=title)
     _maybe_save(boxes, save)
-    return boxes
+    return cast(alt.Chart, boxes)
 
 
 def alt_lineplot(
@@ -198,7 +199,7 @@ def alt_lineplot(
     if "title" in kwargs:
         ch = ch.properties(title=kwargs["title"])
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_matrix_heatmap(
@@ -267,7 +268,7 @@ def alt_matrix_heatmap(
         both = (mat_map + text).properties(title=title, width=400, height=400)
 
     _maybe_save(both, save)
-    return both
+    return cast(alt.Chart, both)
 
 
 def alt_plot_fun(
@@ -304,7 +305,7 @@ def alt_plot_fun(
     )
 
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_density(df: pd.DataFrame, str_x: str, save: str | None = None) -> alt.Chart:
@@ -332,7 +333,7 @@ def alt_density(df: pd.DataFrame, str_x: str, save: str | None = None) -> alt.Ch
     )
 
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_superposed_faceted_densities(
@@ -377,7 +378,7 @@ def alt_superposed_faceted_densities(
     )
     _maybe_save(densities, save)
 
-    return densities
+    return cast(alt.Chart, densities)
 
 
 def alt_linked_scatterplots(
@@ -411,13 +412,13 @@ def alt_linked_scatterplots(
         .encode(
             y=f"{str_y}:Q", color=alt.condition(interval, str_f, alt.value("lightgray"))
         )
-        .properties(selection=interval)
+        .add_params(interval)
     )
 
     ch = base.encode(x=f"{str_x1}:Q") | base.encode(x=f"{str_x2}:Q")
 
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_scatterplot_with_histo(
@@ -447,7 +448,7 @@ def alt_scatterplot_with_histo(
             y=f"{str_y}:Q",
             color=alt.condition(interval, str_f, alt.value("lightgray")),
         )
-        .properties(selection=interval)
+        .add_params(interval)
     )
 
     histogram = (
@@ -464,7 +465,7 @@ def alt_scatterplot_with_histo(
     ch = points & histogram
 
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_faceted_densities(
@@ -507,7 +508,7 @@ def alt_faceted_densities(
     )
 
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_superposed_lineplot(
@@ -546,7 +547,7 @@ def alt_superposed_lineplot(
         )
     )
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_superposed_faceted_lineplot(
@@ -587,11 +588,15 @@ def alt_superposed_faceted_lineplot(
             x=f"{str_x}:{type_x}",
             y=f"{str_y}:Q",
             color=alt.Color(f"{str_f}:N", title=our_title),
-            facet=alt.Facet(f"{str_g}:N", columns=max_cols),
+            facet=(
+                alt.Facet(f"{str_g}:N", columns=max_cols)
+                if max_cols is not None
+                else alt.Facet(f"{str_g}:N")
+            ),
         )
     )
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_histogram_by(
@@ -621,7 +626,7 @@ def alt_histogram_by(
         .properties(height=300, width=400)
     )
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_histogram_continuous(
@@ -640,7 +645,7 @@ def alt_histogram_continuous(
     """
     ch = alt.Chart(df).mark_bar().encode(alt.X(str_x, bin=True), y="count()")
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_stacked_area(
@@ -681,7 +686,7 @@ def alt_stacked_area(
         ch = ch.properties(title=title)
 
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_stacked_area_facets(
@@ -719,11 +724,15 @@ def alt_stacked_area_facets(
             x=f"{str_x}:{type_x}",
             y=alt.Y(f"{str_y}:Q", stack="normalize"),
             color=f"{str_f}:N",
-            facet=alt.Facet(f"{str_g}:N", columns=max_cols),
+            facet=(
+                alt.Facet(f"{str_g}:N", columns=max_cols)
+                if max_cols is not None
+                else alt.Facet(f"{str_g}:N")
+            ),
         )
     )
     _maybe_save(ch, save)
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def _stack_estimates(
@@ -864,7 +873,7 @@ def plot_parameterized_estimates(
 
     _maybe_save(ch, save)
 
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def plot_true_sim_facets(
@@ -953,14 +962,18 @@ def plot_true_sim_facets(
                 sort=sub_order,
                 scale=alt.Scale(domain=sub_order, range=colors),
             ),
-            facet=alt.Facet(f"{stat_title}:N", sort=stat_names, columns=ncols),
+            facet=(
+                alt.Facet(f"{stat_title}:N", sort=stat_names, columns=ncols)
+                if ncols is not None
+                else alt.Facet(f"{stat_title}:N", sort=stat_names)
+            ),
         )
         .resolve_scale(y="independent")
     )
 
     _maybe_save(ch, save)
 
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def plot_true_sim2_facets(
@@ -1053,14 +1066,18 @@ def plot_true_sim2_facets(
                 sort=sub_order,
                 scale=alt.Scale(domain=sub_order, range=colors),
             ),
-            facet=alt.Facet(f"{stat_title}:N", sort=stat_names, columns=ncols),
+            facet=(
+                alt.Facet(f"{stat_title}:N", sort=stat_names, columns=ncols)
+                if ncols is not None
+                else alt.Facet(f"{stat_title}:N", sort=stat_names)
+            ),
         )
         .resolve_scale(y="independent")
     )
 
     _maybe_save(ch, save)
 
-    return ch
+    return cast(alt.Chart, ch)
 
 
 def alt_tick_plots(
@@ -1091,4 +1108,4 @@ def alt_tick_plots(
 
     _maybe_save(ch, save)
 
-    return ch
+    return cast(alt.Chart, ch)
