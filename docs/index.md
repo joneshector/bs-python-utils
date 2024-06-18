@@ -13,6 +13,9 @@ My Python utilities.
 
 ### Release notes
 
+#### 0.7 (June 18, 2024)
+Added `make_lowertri` in `bsnputils`, and some utility code in `bs_plots`.
+
 #### 0.6.4 (November 26, 2023)
 Moved to Altair 5.0; made timing optional in `bs_opt`.
 

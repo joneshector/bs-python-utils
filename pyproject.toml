@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bs_python_utils"
-version = "0.6.4"
+version = "0.6.5"
 description = "my Python utilities"
 authors = ["Bernard Salanie <bsalanie@columbia.edu>"]
 repository = "https://github.com/bsalanie/bs-python-utils"
@@ -12,7 +12,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-scipy = "1.10"
+scipy = ">=1.10"
 pandas = ">=2.2.0"
 altair = ">=5.0"
 matplotlib = ">=3.7.1"
@@ -24,6 +24,7 @@ vega-datasets = ">=0.9.0"
 griffe = ">=0.32.3"
 emcee = ">=3.1.4"
 streamlit = ">=1.28.0"
+rich = "^13.7.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.2.0"
@@ -57,7 +58,7 @@ show_error_codes = "True"
 
 [tool.ruff]
 target-version = "py310"
-line-length = 120
+line-length = 88
 fix = true
 select = [
     # flake8-2020

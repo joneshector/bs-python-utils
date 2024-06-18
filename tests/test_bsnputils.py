@@ -6,10 +6,12 @@ from bs_python_utils.bsnputils import (
     bs_sqrt_pdmatrix,
     bsgrid,
     ecdf,
+    find_row_single_nonzero,
     gauher,
     gaussian_expectation,
     inv_ecdf,
     make_lexico_grid,
+    make_lower_tri,
     npexp,
     nplog,
     nppad2_end_zeros,
@@ -294,3 +296,43 @@ def test_nppow_array():
     assert np.allclose(d2resaa, d2resaath)
     assert np.allclose(d2resab, d2resabth)
     assert np.allclose(d2resbb, d2resbbth)
+
+
+def test_find_row_single_nonzero():
+    m1 = np.array([[2, 3, 0], [7, 4, 5], [0, 6, 0]])
+    assert find_row_single_nonzero(m1) == (2, 1)
+    m2 = np.array([[2, 3, 0], [1, 0, 5], [1, 6, 0]])
+    assert find_row_single_nonzero(m2) is None
+    m3 = np.array([[2, 3], [0, 0], [1, 6]])
+    assert find_row_single_nonzero(m3) == (1, 0)
+
+
+def test_make_lowertri():
+    m6 = np.array(
+        [
+            [1, 2, 0, 1, 0, 2],
+            [4, 1, 0, 5, 0, 0],
+            [0, 0, 0, 4, 0, 0],
+            [2, 1, 7, 2, 1, 3],
+            [2, 3, 2, 0, 0, 3],
+            [0, 2, 0, 1, 0, 0],
+        ]
+    )
+    lower_m6, prows_m6, pcols_m6 = make_lower_tri(m6)
+    assert np.allclose(
+        lower_m6,
+        np.array(
+            [
+                [4, 0, 0, 0, 0, 0],
+                [1, 2, 0, 0, 0, 0],
+                [5, 1, 4, 0, 0, 0],
+                [1, 2, 1, 2, 0, 0],
+                [0, 3, 2, 3, 2, 0],
+                [2, 1, 2, 3, 7, 1],
+            ]
+        ),
+    )
+    assert prows_m6 == [3, 6, 2, 1, 5, 4]
+    assert pcols_m6 == [4, 2, 1, 6, 3, 5]
+    m = np.full((3, 3), 1)
+    assert make_lower_tri(m) is None

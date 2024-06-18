@@ -24,6 +24,9 @@ Note:
 * `quantile_transform`: returns the quantiles of values in an array
 * `print_quantiles`: prints requested quantiles of an array
 * `set_elements_abovebelow_diagonal`: sets all elements of the given matrix above or below the diagonal to a specified scalar value.
+* `find_row_single_nonzero`: find a row that has at most one nonzero element in a matrix
+* `bring_row_up`, `bring_col_left`: bring a row up, or a column left
+* `make_lower_tri`: make a square matrix lower triangular, if possible
 """
 
 import sys
@@ -1130,3 +1133,114 @@ def set_elements_abovebelow_diagonal(
     new_matrix[row_indices, col_indices] = scalar
 
     return new_matrix
+
+
+def find_row_single_nonzero(m: np.ndarray) -> tuple[int, int] | None:
+    """find a row that has at most one nonzero element in a matrix
+
+    Args:
+        m: a matrix
+
+    Returns:
+        the indices of the first such row, and of the column where the nonzero element is
+        (if that row is identically zero, return 0 for the column index)
+        or `None` if no such row exists.
+    """
+    n_nonzero, i_row, row, row_nonzeros = np.inf, 0, m[0], np.array([0])
+    for row in m:
+        row_nonzeros = cast(tuple[np.ndarray], np.nonzero(row))[0]
+        print(f"{row_nonzeros=}")
+        n_nonzero = row_nonzeros.size
+        if n_nonzero <= 1:
+            print(f"found {i_row=}")
+            break
+        i_row += 1
+
+    if n_nonzero == 1:
+        i_col = row_nonzeros[0]
+        print(f"found {i_col=}")
+        return i_row, i_col
+    elif n_nonzero == 0:
+        return i_row, 0
+    else:
+        return None
+
+
+def bring_row_up(m: np.ndarray, old_row: int, new_row: int) -> np.ndarray:
+    """bring a row of a matrix to a higher row
+
+    Args:
+        m: a Numpy matrix
+        old_row: the original index of the row
+        new_row: the destination index of the row
+
+    Returns:
+        a matrix of the same shape with row `old_row` brought up to the
+        `new_row` position.
+    """
+    mp = m.copy()
+    mp[new_row, :] = m[old_row, :].copy()
+    mp[(new_row + 1) : (old_row + 1), :] = m[new_row:old_row, :].copy()
+    return mp
+
+
+def bring_col_left(m: np.ndarray, old_col: int, new_col: int) -> np.ndarray:
+    """bring a column of a matrix to a column on the left of it
+
+    Args:
+        m: a Numpy matrix
+        old_col: the original index of the column
+        new_col: the destination index of the column
+
+    Returns:
+        a matrix of the same shape with column `old_col`
+        brought to the `new_col` position
+    """
+    mp = m.copy()
+    mp[:, new_col] = m[:, old_col].copy()
+    mp[:, (new_col + 1) : (old_col + 1)] = m[:, new_col:old_col].copy()
+    return mp
+
+
+def make_lower_tri(m: np.ndarray) -> tuple[np.ndarray, list[int], list[int]] | None:
+    """make a square matrix lower triangular, if possible
+
+    Args:
+        m: a Numpy square matrix
+
+    Returns:
+        if permuting rows and columns can make `m` lower triangular: the lower triangularized marix,
+        and the row and column permutations used
+        else we return `None`.
+    """
+    # print(f"{m=}")
+    n = check_square(m, "make_lower_tri")
+    n1 = n - 1
+    perm_rows = list(range(1, n + 1))
+    perm_cols = list(range(1, n + 1))
+    mt = m.copy()
+    for i in range(n1):
+        perm_rows_prev = perm_rows.copy()
+        perm_cols_prev = perm_cols.copy()
+        # print(f"{mt=}")
+        # print(f"{i=}")
+        ind_row_col = find_row_single_nonzero(mt[i:, i:])
+        # print(f"{ind_row_col=}")
+        if ind_row_col is None:
+            return None
+        else:
+            i_row, i_col = ind_row_col[0] + i, ind_row_col[1] + i
+            if i_row > i:
+                mt = bring_row_up(mt, i_row, i)
+                perm_rows[i] = perm_rows_prev[i_row]
+                for j in range(i, i_row):
+                    perm_rows[j + 1] = perm_rows_prev[j]
+            if i_col > i:
+                mt = bring_col_left(mt, i_col, i)
+                perm_cols[i] = perm_cols_prev[i_col]
+                for j in range(i, i_col):
+                    perm_cols[j + 1] = perm_cols_prev[j]
+            # print(f"{perm_rows=}")
+            # print(f"{perm_cols=}")
+
+    return mt, perm_rows, perm_cols
