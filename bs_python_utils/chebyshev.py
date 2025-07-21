@@ -13,6 +13,7 @@ Note:
 * `cheb_find_root`: finds the roots of a function in an interval
 * `cheb_integrate_from_coeffs_1d`: integrates a function given its coefficients
 * `cheb_integrate_from_nodes_1d`: integrates a function given its values at the nodes (less precise)
+
 * `cheb_get_nodes_2d`: get Chebyshev nodes and weights on a rectangle
 * `cheb_eval_fun_at_nodes_2d`: evaluates a function at is nodes on a rectangle
 * `cheb_get_coefficients_2d`: get the Chebyshev coefficients for a function of 2 arguments
@@ -340,10 +341,10 @@ def cheb_eval_fun_at_nodes_2d(
 
 
 def cheb_get_coefficients_2d(
+    fun: ArrayFunctionOfArray | None = None,
     rectangle: Rectangle,
     degree: int,
-    vals_at_nodes: np.ndarray | None = None,
-    fun: ArrayFunctionOfArray | None = None,
+    vals_at_nodes: np.ndarray | None = None
 ) -> np.ndarray:
     """get the Chebyshev coefficients for `fun` on a rectangle,
     using an OLS fit on the values on the grid of nodes
@@ -415,7 +416,7 @@ def cheb_interp_2d(
             bs_error_abort("either c or degree must be provided")
         degree = cast(int, degree)
         c = cheb_get_coefficients_2d(
-            rectangle, degree, vals_at_nodes=vals_at_nodes, fun=fun
+            fun=fun, rectangle, degree, vals_at_nodes=vals_at_nodes
         )
     # transform xy_vals to $[-1,1]\times [-1,1]$
     xy_vals1 = np.zeros_like(xy_vals)
@@ -461,7 +462,7 @@ def cheb_interp_2d_from_nodes(
         rectangle = Rectangle(x_interval=interval01, y_interval=interval01)
     degree = round(sqrt(f_vals_at_nodes.size))
     coeffs_f = cheb_get_coefficients_2d(
-        rectangle, degree, vals_at_nodes=f_vals_at_nodes
+        rectangle=rectangle, degree=degree, vals_at_nodes=f_vals_at_nodes
     )
     f_x, _ = cheb_interp_2d(x, rectangle, c=coeffs_f)
     return cast(float, f_x)

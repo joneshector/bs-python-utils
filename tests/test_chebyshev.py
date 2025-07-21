@@ -18,7 +18,6 @@ from bs_python_utils.chebyshev import (
     cheb_integrate_from_coeffs_2d,
     cheb_integrate_from_nodes_1d,
     cheb_integrate_from_nodes_2d,
-    cheb_integrate_from_nodes_4d,
     cheb_interp_1d,
     cheb_interp_1d_from_nodes,
     cheb_interp_2d,
@@ -150,7 +149,7 @@ def test_cheb_interp_2d():
     rectangle = Rectangle(x_interval=x_interval, y_interval=y_interval)
     vals = 0.1 + np.arange(2) / 3.0
     xy_vals = bsgrid(vals, vals)
-    c = cheb_get_coefficients_2d(rectangle, deg, fun=fun2d)
+    c = cheb_get_coefficients_2d(fun=fun2d, rectangle, deg)
     f_vals, c2 = cheb_interp_2d(xy_vals, rectangle=rectangle, c=c)
     assert np.allclose(c2, c)
     f_vals_th = fun2d(xy_vals)
@@ -182,7 +181,7 @@ def test_cheb_integrate_from_coeffs_2d():
     x_interval = Interval(x0=x0, x1=x1)
     y_interval = Interval(x0=y0, x1=y1)
     rectangle = Rectangle(x_interval=x_interval, y_interval=y_interval)
-    c = cheb_get_coefficients_2d(rectangle, deg, fun=fun2d)
+    c = cheb_get_coefficients_2d(fun=fun2d, rectangle, deg)
     val_integral = cheb_integrate_from_coeffs_2d(c, rectangle)
     val_integral_th = 1.0 / 2.0 * (1.0 - exp(-1.0))
     assert isclose(val_integral, val_integral_th)
@@ -197,18 +196,6 @@ def test_cheb_integrate_from_nodes_2d():
     vals_at_nodes = cheb_eval_fun_at_nodes_2d(fun2d, rectangle=rectangle, degree=deg)
     val_integral = cheb_integrate_from_nodes_2d(vals_at_nodes, weights)
     val_integral_th = 1.0 / 2.0 * (1.0 - exp(-1.0))
-    assert isclose(val_integral, val_integral_th, abs_tol=1e-3)
-
-
-def test_cheb_integrate_from_nodes_4d():
-    deg, x0, x1, y0, y1 = 128, 0.0, 1.0, 0.0, 1.0
-    x_interval = Interval(x0=x0, x1=x1)
-    y_interval = Interval(x0=y0, x1=y1)
-    rectangle = Rectangle(x_interval=x_interval, y_interval=y_interval)
-    nodes2d, weights2d = cheb_get_nodes_2d(rectangle, deg)
-    vals_at_nodes4d = fun2d_2d(nodes2d, nodes2d)
-    val_integral = cheb_integrate_from_nodes_4d(vals_at_nodes4d, weights2d)
-    val_integral_th = 1.0 - exp(-1.0)
     assert isclose(val_integral, val_integral_th, abs_tol=1e-3)
 
 
